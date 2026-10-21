@@ -1,11 +1,15 @@
+from secrets import compare_digest
+
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.translate import get_all_translations
-from frappe.utils import escape_html, split_emails, validate_email_address
+from frappe.utils import add_to_date, escape_html, now_datetime, split_emails, validate_email_address
 
 from drive.api.permissions import get_teams, is_admin
 from drive.utils import default_team
+
+OTP_VALIDITY_MINUTES = 10
 
 
 def access_app():
@@ -216,8 +220,13 @@ def send_otp(email: str, login: bool = False):
 @rate_limit(limit=5, seconds=60)
 def verify_otp(account_request: str, otp: str):
     req = frappe.get_doc("Account Request", account_request)
-    if req.otp != otp:
-        frappe.throw("Invalid OTP")
+    expired = not req.otp_generated_at or req.otp_generated_at < add_to_date(
+        now_datetime(), minutes=-OTP_VALIDITY_MINUTES
+    )
+    if not req.otp or expired or not compare_digest(str(req.otp), str(otp)):
+        frappe.throw("Invalid or expired OTP")
+    # An OTP works once; a new one has to be requested for the next login
+    req.otp = None
     req.login_count += 1
     req.save(ignore_permissions=True)
 
