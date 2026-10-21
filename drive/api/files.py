@@ -788,6 +788,16 @@ def delete_entities(entity_names=None, clear_all=None):
         frappe.get_doc("Drive File", entity).permanent_delete()
 
 
+# Controller methods that may be called from the client, with the access each one needs.
+# Anything not listed here is refused, so internal helpers on Drive File can't be reached.
+CONTROLLER_METHODS = {
+    "rename": "write",
+    "change_color": "write",
+    "share": "share",
+    "unshare": "share",
+}
+
+
 @frappe.whitelist(allow_guest=True)
 def call_controller_method():
     """
@@ -796,14 +806,25 @@ def call_controller_method():
     :param entity_name: Document-name of the document on which the controller method is to be called
     :param method: The controller method to be called
     :raises ValueError: If the entity does not exist
+    :raises PermissionError: If the method isn't callable from the client, or the user lacks access
     :return: The result of the controller method
     """
-    method = frappe.local.form_dict.pop("method")
-    entity_name = frappe.local.form_dict.pop("entity_name")
-    frappe.local.form_dict.pop("cmd")
-    drive_file = frappe.get_doc("Drive File", entity_name)
-    if not drive_file:
+    method = frappe.local.form_dict.pop("method", None)
+    entity_name = frappe.local.form_dict.pop("entity_name", None)
+    frappe.local.form_dict.pop("cmd", None)
+
+    ptype = CONTROLLER_METHODS.get(method)
+    if not ptype:
+        frappe.throw("Method not allowed", frappe.PermissionError)
+    if not entity_name or not frappe.db.exists("Drive File", entity_name):
         frappe.throw("Entity does not exist", ValueError)
+
+    drive_file = frappe.get_doc("Drive File", entity_name)
+    # A user may always remove their own access, even without share rights
+    leaving = method == "unshare" and frappe.local.form_dict.get("user") == frappe.session.user
+    if not leaving and not user_has_permission(drive_file, ptype):
+        frappe.throw("You don't have permission for this action.", frappe.PermissionError)
+
     return drive_file.run_method(method, **frappe.local.form_dict)
 
 

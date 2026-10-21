@@ -58,6 +58,10 @@ class DriveFile(Document):
         if self.flags.file_created:
             shutil.rmtree(self.path) if self.is_group else self.path.unlink()
 
+    def check_entity_permission(self, ptype):
+        if not user_has_permission(self, ptype):
+            frappe.throw("You don't have permission for this action.", frappe.PermissionError)
+
     def get_children(self):
         """Return a generator that yields child Documents."""
         child_names = frappe.get_list(self.doctype, filters={"parent_entity": self.name}, pluck="name")
@@ -163,6 +167,7 @@ class DriveFile(Document):
         :raises FileExistsError: If a file or folder with the same name already exists in the parent folder
         :return: DriveEntity doc once it's renamed
         """
+        self.check_entity_permission("write")
         if new_title == self.title:
             return self
 
@@ -211,6 +216,7 @@ class DriveFile(Document):
         :raises InvalidColor: If the color is not a hex value string
         :return: DriveEntity doc once it's updated
         """
+        self.check_entity_permission("write")
         return frappe.db.set_value("Drive File", self.name, "color", new_color, update_modified=False)
 
     def permanent_delete(self):
@@ -285,6 +291,9 @@ class DriveFile(Document):
         :param user: User or group with whom this is to be shared
         :param user_type:
         """
+        # Anyone may drop their own access; removing others' needs share rights
+        if user != frappe.session.user:
+            self.check_entity_permission("share")
         absolute_path = generate_upward_path(self.name)
         for i in absolute_path:
             if i["owner"] == user:
