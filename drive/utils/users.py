@@ -55,6 +55,9 @@ def generate_otp():
 
 
 def get_country_info():
+    # Looking up the location sends the visitor's IP to ip-api.com, so it is opt-in
+    if not frappe.conf.get("drive_enable_ip_geolocation"):
+        return {}
     ip = frappe.local.request_ip
 
     def _get_country_info():
