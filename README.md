@@ -79,6 +79,7 @@ They apply to this fork in the same way as to upstream Drive.
 
 | Site config key | Default | Effect |
 | --- | --- | --- |
+| `drive_app_roles` | not set | A role name or a list of them, for example `["System Manager"]`. Only users with one of these roles (and Administrator) see Drive on the apps screen. It hides the icon only; file permissions are unchanged. |
 | `drive_enable_ip_geolocation` | off | When on, sign-up and OTP requests look up the requester's IP address at `pro.ip-api.com`, which is what upstream always did. |
 
 ## Running the tests
@@ -87,6 +88,7 @@ They apply to this fork in the same way as to upstream Drive.
 bench --site test-site set-config allow_tests 1
 bench --site test-site run-tests --module drive.api.test_controller_method
 bench --site test-site run-tests --module drive.api.test_otp
+bench --site test-site run-tests --module drive.api.test_access_app
 ```
 
 Upstream's Cypress UI tests are still in `cypress/`.
@@ -118,6 +120,7 @@ Frappe Drive は 2026-10-01 に上流でアーカイブされ、開発は Frappe
   Suite が正式版になったら、Suite の README の手順でそのまま移行できます
 - 変更点：[CHANGELOG.md](CHANGELOG.md)
 - 脆弱性の報告：[SECURITY.md](SECURITY.md)（公開の Issue には書かないでください）
+- アプリ画面のアイコンを特定ロールだけに出すには、サイト設定 `drive_app_roles` を使います（例：`["System Manager"]`）
 - 画面の文言の多くは翻訳の仕組みを通っていないため、日本語化は一部です
 
 ライセンスは上流と同じ AGPL-3.0 です。

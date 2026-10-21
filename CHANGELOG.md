@@ -2,6 +2,14 @@
 
 Changes in this fork, on top of upstream `main` at `0bd11d8` (Frappe Drive v0.3.0).
 
+## 0.3.2 (2026-10-21)
+
+### Added
+
+- The site config key `drive_app_roles` limits who sees Drive on the apps screen, for example
+  `["System Manager"]`. Administrator always sees it. Without the key, everyone does, as upstream.
+  It only hides the icon: `/drive` and shared links still work, and file access is unchanged.
+
 ## 0.3.1 (2026-10-21)
 
 ### Security
