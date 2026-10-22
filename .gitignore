@@ -6,8 +6,8 @@ tags
 **/node_modules
 **/dist/
 **/__pycache__
-drive/public/frontend
-drive/www/drive.html
+lifegence_drive/public/frontend
+lifegence_drive/www/drive.html
 experiments/*
 *log.json
 .env

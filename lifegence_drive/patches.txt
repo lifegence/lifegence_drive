@@ -1,0 +1,15 @@
+[pre_model_sync]
+lifegence_drive.patches.team_restructure #8
+lifegence_drive.patches.update_roles
+lifegence_drive.patches.remove_personal #3
+lifegence_drive.patches.integrate_with_framework
+
+[post_model_sync]
+lifegence_drive.patches.folder_size #3
+lifegence_drive.patches.settings
+lifegence_drive.patches.new_writer #3
+lifegence_drive.patches.turn_on_flat_disk
+lifegence_drive.patches.add_modified_field
+lifegence_drive.patches.add_drive_user_role
+lifegence_drive.patches.add_search_index
+lifegence_drive.patches.remove_expired_permissions_job

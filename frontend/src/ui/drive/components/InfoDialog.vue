@@ -148,7 +148,7 @@ const props = defineProps({
 
 // Refactor to share with ShareDialog
 const getGeneralAccess = createResource({
-  url: 'drive.api.permissions.get_user_access',
+  url: 'lifegence_drive.api.permissions.get_user_access',
   makeParams: (params) => ({
     ...params,
     entity: props.entity.name,
@@ -168,7 +168,7 @@ const getGeneralAccess = createResource({
 getGeneralAccess.fetch({ user: 'Guest' })
 
 const userAccess = createResource({
-  url: 'drive.api.permissions.get_shared_with_list',
+  url: 'lifegence_drive.api.permissions.get_shared_with_list',
   params: { entity: props.entity.name },
   auto: true,
 })

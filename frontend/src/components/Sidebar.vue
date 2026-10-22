@@ -93,7 +93,7 @@ getTeams.fetch()
 apps.fetch()
 
 const teamExists = createResource({
-  url: 'drive.utils.get_default_team',
+  url: 'lifegence_drive.utils.get_default_team',
   auto: true,
   onSuccess: (d) => !d && router.replace({ name: 'Setup' }),
 })

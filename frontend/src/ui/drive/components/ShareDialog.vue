@@ -247,7 +247,7 @@ const generalPerms = ref('reader')
 const chosenTeam = ref()
 
 const getGeneralAccess = createResource({
-  url: 'drive.api.permissions.get_user_access',
+  url: 'lifegence_drive.api.permissions.get_user_access',
   makeParams: (params) => ({
     ...params,
     entity: props.entity.name,

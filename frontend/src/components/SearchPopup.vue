@@ -112,7 +112,7 @@ const open = defineModel()
 const searchResults = createResource({
   auto: false,
   method: 'POST',
-  url: 'drive.api.files.search',
+  url: 'lifegence_drive.api.files.search',
 })
 
 watch(search, (val) => {

@@ -2,7 +2,7 @@ import { createResource, toast } from 'frappe-ui'
 import { openEntity } from './utils'
 
 export const getTeams = createResource({
-  url: 'drive.api.permissions.get_teams',
+  url: 'lifegence_drive.api.permissions.get_teams',
   params: {
     details: 1,
   },
@@ -11,7 +11,7 @@ export const getTeams = createResource({
 })
 
 export const move = createResource({
-  url: 'drive.api.files.move',
+  url: 'lifegence_drive.api.files.move',
   onSuccess(data) {
     toast.success('Moved to ' + data.file_name, {
       action: {
@@ -27,18 +27,18 @@ export const move = createResource({
 
 // Share dialog resources
 export const usersWithAccess = createResource({
-  url: 'drive.api.permissions.get_shared_with_list',
+  url: 'lifegence_drive.api.permissions.get_shared_with_list',
   makeParams: (params) => params,
 })
 
 export const updateAccess = createResource({
-  url: 'drive.api.files.update_access',
+  url: 'lifegence_drive.api.files.update_access',
   makeParams: (params) => ({ ...params, method: params.method || 'share' }),
   onError: (error) => toast.error(error.messages[0]),
 })
 
 export const allUsers = createResource({
-  url: 'drive.api.product.get_team_users',
+  url: 'lifegence_drive.api.product.get_team_users',
   transform: (data) => {
     data.map((item) => {
       item.value = item.email
@@ -49,7 +49,7 @@ export const allUsers = createResource({
 })
 
 export const rename = createResource({
-  url: 'drive.api.files.rename',
+  url: 'lifegence_drive.api.files.rename',
   method: 'POST',
   makeParams: (data) => {
     return {

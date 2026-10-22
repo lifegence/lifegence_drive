@@ -29,7 +29,7 @@ function doesRootFolderFullPathExist(k, file_parent) {
   const url =
     window.location.origin +
     '/api/method/' +
-    `drive.api.files.does_entity_exist?name=${k}&folder=${file_parent}`
+    `lifegence_drive.api.files.does_entity_exist?name=${k}&folder=${file_parent}`
 
   const xhr = new XMLHttpRequest()
   // third parameter false for a synchronous request
@@ -48,7 +48,7 @@ function rootFolderFullPathNewName(k, file_parent) {
   const url =
     window.location.origin +
     '/api/method/' +
-    `drive.api.files.get_new_title?title=${k}&parent_name=${file_parent}&folder=${true}`
+    `lifegence_drive.api.files.get_new_title?title=${k}&parent_name=${file_parent}&folder=${true}`
 
   const xhr = new XMLHttpRequest()
   xhr.open('GET', url, false) // Here i am seeting third parameter as false for a synchronous request

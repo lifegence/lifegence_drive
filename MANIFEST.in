@@ -4,15 +4,15 @@ include *.json
 include *.md
 include *.py
 include *.txt
-recursive-include drive *.css
-recursive-include drive *.csv
-recursive-include drive *.html
-recursive-include drive *.ico
-recursive-include drive *.js
-recursive-include drive *.json
-recursive-include drive *.md
-recursive-include drive *.png
-recursive-include drive *.py
-recursive-include drive *.svg
-recursive-include drive *.txt
-recursive-exclude drive *.pyc
+recursive-include lifegence_drive *.css
+recursive-include lifegence_drive *.csv
+recursive-include lifegence_drive *.html
+recursive-include lifegence_drive *.ico
+recursive-include lifegence_drive *.js
+recursive-include lifegence_drive *.json
+recursive-include lifegence_drive *.md
+recursive-include lifegence_drive *.png
+recursive-include lifegence_drive *.py
+recursive-include lifegence_drive *.svg
+recursive-include lifegence_drive *.txt
+recursive-exclude lifegence_drive *.pyc

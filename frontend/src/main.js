@@ -26,7 +26,7 @@ app.config.globalProperties.emitter = emitter
 app.provide('emitter', emitter)
 app.use(router)
 app.use(store)
-app.use(translation, 'drive.api.product.get_translations')
+app.use(translation, 'lifegence_drive.api.product.get_translations')
 
 app.use(FrappeUI, { socketio: false })
 app.provide('socket', initSocket())

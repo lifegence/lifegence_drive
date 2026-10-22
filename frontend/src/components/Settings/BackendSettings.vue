@@ -137,7 +137,7 @@ getDiskSettings.fetch(null, {
 })
 
 const updateSettings = createResource({
-  url: 'drive.api.product.disk_settings',
+  url: 'lifegence_drive.api.product.disk_settings',
   method: 'PUT',
   makeParams: () => ({ ...generalSettings, ...s3Settings }),
   onSuccess() {

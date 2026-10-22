@@ -25,7 +25,7 @@ function translate(message) {
 
 function fetchTranslations() {
   createResource({
-    url: 'drive.api.product.get_translations',
+    url: 'lifegence_drive.api.product.get_translations',
     cache: 'translations',
     auto: true,
     transform: (data) => {

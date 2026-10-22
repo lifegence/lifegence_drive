@@ -1,5 +1,5 @@
 // Folder / multi-file downloads are streamed as a zip by the backend
-// (drive.api.files.download_folder). Single files stream directly. Nothing is
+// (lifegence_drive.api.files.download_folder). Single files stream directly. Nothing is
 // buffered in browser memory, so large folders no longer hang the tab.
 
 export function entitiesDownload(entities, transfer = false) {

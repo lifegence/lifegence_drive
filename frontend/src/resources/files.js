@@ -17,7 +17,7 @@ export const COMMON_OPTIONS = {
 
 export const getTeam = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.files',
+  url: 'lifegence_drive.api.list.files',
   makeParams: (params) => {
     return {
       ...params,
@@ -29,7 +29,7 @@ export const getTeam = createResource({
 
 export const getFiles = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.files',
+  url: 'lifegence_drive.api.list.files',
   makeParams: (params) => {
     return params
   },
@@ -46,7 +46,7 @@ export const getTeams = createResource({
 })
 
 export const getPublicTeams = createResource({
-  url: 'drive.api.permissions.get_public_teams',
+  url: 'lifegence_drive.api.permissions.get_public_teams',
   method: 'GET',
   cache: 'public-teams',
   transform: (d) => {
@@ -56,20 +56,20 @@ export const getPublicTeams = createResource({
 
 export const getRecents = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.recents',
+  url: 'lifegence_drive.api.list.recents',
   cache: 'recents-folder-contents'
 })
 
 export const getPersonal = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.files',
+  url: 'lifegence_drive.api.list.files',
   cache: 'personal-folder-contents',
   makeParams: (params) => params,
 })
 
 export const getSiteFiles = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.files',
+  url: 'lifegence_drive.api.list.files',
   cache: 'site-folder-contents',
   makeParams: (params) => ({ ...params, entity_name: 'Home' }),
   transform(data) {
@@ -79,20 +79,20 @@ export const getSiteFiles = createResource({
 })
 
 export const getAttachments = createResource({
-  url: 'drive.api.list.get_attachments',
+  url: 'lifegence_drive.api.list.get_attachments',
   makeParams: (params) => params,
   cache: 'attachments-folder-contents',
 })
 
 export const getFavourites = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.favourites',
+  url: 'lifegence_drive.api.list.favourites',
   cache: 'favourite-folder-contents',
 })
 
 export const getDocuments = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.files',
+  url: 'lifegence_drive.api.list.files',
   makeParams: (params) => {
     return { ...params, file_kinds: '["Frappe Document"]' }
   },
@@ -119,7 +119,7 @@ export const getSlides = createResource({
 
 export const getShared = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.shared',
+  url: 'lifegence_drive.api.list.shared',
   cache: 'shared-folder-contents',
   makeParams: (params) => {
     return { shared_type: 'with', ...params }
@@ -128,7 +128,7 @@ export const getShared = createResource({
 
 export const getTrash = createResource({
   ...COMMON_OPTIONS,
-  url: 'drive.api.list.trash',
+  url: 'lifegence_drive.api.list.trash',
   cache: 'trash-folder-contents',
   makeParams: (params) => {
     return { ...params }
@@ -164,7 +164,7 @@ export const updateMoved = (team, new_parent, special) => {
     // No further mutation of the resource object can take place
     createResource({
       ...COMMON_OPTIONS,
-      url: 'drive.api.list.files',
+      url: 'lifegence_drive.api.list.files',
       makeParams: (params) => ({
         ...params,
         entity_name: new_parent,
@@ -186,7 +186,7 @@ export const updateMoved = (team, new_parent, special) => {
 }
 
 export const toggleFav = createResource({
-  url: 'drive.api.files.set_favourite',
+  url: 'lifegence_drive.api.files.set_favourite',
   makeParams(data) {
     if (!data) {
       getFavourites.setData([])
@@ -217,7 +217,7 @@ export const toggleFav = createResource({
 })
 
 export const clearRecent = createResource({
-  url: 'drive.api.files.remove_recents',
+  url: 'lifegence_drive.api.files.remove_recents',
   makeParams: (data) => {
     if (!data) {
       getRecents.setData([])
@@ -240,7 +240,7 @@ export const clearRecent = createResource({
 })
 
 export const clearTrash = createResource({
-  url: 'drive.api.files.delete_entities',
+  url: 'lifegence_drive.api.files.delete_entities',
   makeParams: (data) => {
     if (!data) {
       getTrash.setData([])
@@ -264,7 +264,7 @@ export const clearTrash = createResource({
 })
 
 export const rename = createResource({
-  url: 'drive.api.files.rename',
+  url: 'lifegence_drive.api.files.rename',
   method: 'POST',
   makeParams: (data) => {
     return {
@@ -299,7 +299,7 @@ export const createDocument = createResource({
 
 
 export const move = createResource({
-  url: 'drive.api.files.move',
+  url: 'lifegence_drive.api.files.move',
   onSuccess(data) {
     toast({
       title: 'Moved to ' + data.title,
@@ -332,7 +332,7 @@ export const translate = createResource({
 })
 
 export const storageBar = createResource({
-  url: 'drive.api.storage.storage_bar_data',
+  url: 'lifegence_drive.api.storage.storage_bar_data',
   method: 'GET',
   cache: 'total_storage',
 })

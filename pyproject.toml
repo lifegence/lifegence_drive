@@ -1,6 +1,7 @@
 [project]
-name = "drive"
+name = "lifegence_drive"
 authors = [
+    { name = "Lifegence Corporation", email = "masakazu.nomura@lifegence.com" },
     { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io" },
 ]
 description = "An easy to use, document sharing and management solution."
@@ -40,11 +41,9 @@ frappe = ">=15.0.0-dev,<=17.0.0-dev"
 
 [tool.bench.assets]
 build_dir = "./frontend"
-out_dir = "../drive/public/frontend"
-index_html_path = "../drive/www/drive.html"
+out_dir = "../lifegence_drive/public/frontend"
+index_html_path = "../lifegence_drive/www/drive.html"
 
 [project.urls]
-Homepage = "https://frappe.io/drive"
-Documentation = "https://docs.frappe.io/drive"
-Repository = "https://github.com/frappe/drive.git"
-"Bug Reports" = "https://github.com/frappe/drive/issues"
+Repository = "https://github.com/lifegence/drive.git"
+Upstream = "https://github.com/frappe/drive"

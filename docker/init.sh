@@ -22,7 +22,7 @@ bench set-redis-socketio-host redis:6379
 sed -i '/redis/d' ./Procfile
 sed -i '/watch/d' ./Procfile
 
-bench get-app drive --branch main
+bench get-app https://github.com/lifegence/drive --branch lifegence
 
 bench new-site drive.localhost \
 --force \
@@ -30,7 +30,7 @@ bench new-site drive.localhost \
 --admin-password admin \
 --no-mariadb-socket
 
-bench --site drive.localhost install-app drive
+bench --site drive.localhost install-app lifegence_drive
 bench --site drive.localhost set-config developer_mode 1
 bench --site drive.localhost clear-cache
 bench --site drive.localhost set-config mute_emails 1

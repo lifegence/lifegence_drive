@@ -108,7 +108,7 @@ watch(onlyUnread, (newValue) => {
 })
 
 const notifications = createResource({
-  url: 'drive.api.notifications.get_notifications',
+  url: 'lifegence_drive.api.notifications.get_notifications',
   auto: true,
   params: {
     only_unread: onlyUnread.value,
@@ -122,7 +122,7 @@ const notifications = createResource({
 })
 
 const markAsRead = createResource({
-  url: 'drive.api.notifications.mark_as_read',
+  url: 'lifegence_drive.api.notifications.mark_as_read',
   auto: false,
   method: 'POST',
   params: {
