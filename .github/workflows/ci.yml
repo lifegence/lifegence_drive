@@ -1,0 +1,86 @@
+name: Tests
+
+on:
+  push:
+    branches: [lifegence]
+  pull_request:
+    branches: [lifegence]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Frappe ${{ matrix.frappe }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - frappe: version-16
+            python: "3.14"
+            node: 24
+          - frappe: version-15
+            python: "3.11"
+            node: 20
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports: ["3306:3306"]
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lifegence_drive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mariadb-client
+
+      - name: Set up bench
+        run: |
+          pip install frappe-bench
+          bench init --frappe-branch ${{ matrix.frappe }} --skip-redis-config-generation --skip-assets \
+            --python "$(which python)" ~/frappe-bench
+          mariadb --host 127.0.0.1 -uroot -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
+          mariadb --host 127.0.0.1 -uroot -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+
+      - name: Install Drive
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench get-app --skip-assets lifegence_drive "$GITHUB_WORKSPACE/lifegence_drive"
+          bench set-config -g db_host 127.0.0.1
+          bench set-config -g redis_cache redis://127.0.0.1:6379
+          bench set-config -g redis_queue redis://127.0.0.1:6379
+          bench set-config -g redis_socketio redis://127.0.0.1:6379
+          bench new-site test_site --db-root-password root --admin-password admin --mariadb-user-host-login-scope=%
+          bench --site test_site install-app lifegence_drive
+          bench --site test_site set-config allow_tests 1
+
+      - name: Run tests
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench --site test_site run-tests --module lifegence_drive.api.test_otp
+          bench --site test_site run-tests --module lifegence_drive.api.test_access_app
