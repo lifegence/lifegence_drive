@@ -22,8 +22,10 @@ from lifegence_drive.utils import (
     validate_filename,
     is_site_file,
     ATTACHMENT_CONTENT_DOCTYPE,
+    PRESENTATION_CONTENT_DOCTYPE,
     STATUS_ACTIVE,
     STATUS_TRASHED,
+    WRITER_CONTENT_DOCTYPE,
 )
 from lifegence_drive.utils.api import prettify_file
 from lifegence_drive.utils.files import FileManager, get_s3_key, get_s3_url
@@ -31,7 +33,14 @@ from lifegence_drive.utils.users import mark_as_viewed
 
 from .permissions import get_teams, user_has_permission
 
-FORBIDDEN_DOWNLOAD_TYPES = ["Folder", "Link", "Document", "Presentation"]
+FORBIDDEN_DOWNLOAD_TYPES = ["Folder", "Link"]
+# Writer documents and presentations live in their own DocTypes and have no file to download.
+# Uploaded Office files share their "Document" / "Presentation" file types, so check the content.
+HOSTED_CONTENT_DOCTYPES = [WRITER_CONTENT_DOCTYPE, PRESENTATION_CONTENT_DOCTYPE]
+
+
+def has_blob(file):
+    return file.file_type not in FORBIDDEN_DOWNLOAD_TYPES and file.content_doctype not in HOSTED_CONTENT_DOCTYPES
 
 
 @frappe.whitelist(allow_guest=True)
@@ -294,17 +303,21 @@ def get_file_content(entity_name: str, trigger_download: bool = False, token: st
             "status",
             "file_url",
             "team",
+            "content_doctype",
         ],
         as_dict=1,
     )
 
-    if not file or file.file_type in FORBIDDEN_DOWNLOAD_TYPES or file.status != STATUS_ACTIVE:
+    if not file or file.status != STATUS_ACTIVE:
         frappe.throw("Not found", frappe.DoesNotExistError)
 
-    if file.file_type == "Document" or is_site_file(file):
+    if file.content_doctype == WRITER_CONTENT_DOCTYPE or is_site_file(file):
         frappe.local.response["type"] = "redirect"
         frappe.local.response["location"] = file.file_url if is_site_file(file) else ("/drive/w/" + file.name)
         return
+
+    if not has_blob(file):
+        frappe.throw("Not found", frappe.DoesNotExistError)
 
     return get_file_internal(file, trigger_download)
 
@@ -407,13 +420,13 @@ def _iter_folder_files(entity_name, prefix=""):
     children = frappe.get_all(
         "File",
         filters={"folder": entity_name, "status": STATUS_ACTIVE},
-        fields=["name", "file_name", "is_folder", "file_type", "file_url", "team"],
+        fields=["name", "file_name", "is_folder", "file_type", "file_url", "team", "content_doctype"],
     )
     for child in children:
         arcname = f"{prefix}{child.file_name}"
         if child.is_folder:
             yield from _iter_folder_files(child.name, prefix=f"{arcname}/")
-        elif child.file_type not in FORBIDDEN_DOWNLOAD_TYPES and child.file_url:
+        elif has_blob(child) and child.file_url:
             yield arcname, child
 
 
@@ -429,14 +442,14 @@ def _collect_download_files(entity_names):
         entity = frappe.get_value(
             "File",
             name,
-            ["name", "file_name", "is_folder", "file_type", "file_url", "team"],
+            ["name", "file_name", "is_folder", "file_type", "file_url", "team", "content_doctype"],
             as_dict=True,
         )
         if not entity:
             continue
         if entity.is_folder:
             yield from _iter_folder_files(entity.name, prefix=f"{entity.file_name}/")
-        elif entity.file_type not in FORBIDDEN_DOWNLOAD_TYPES and entity.file_url:
+        elif has_blob(entity) and entity.file_url:
             yield entity.file_name, entity
 
 

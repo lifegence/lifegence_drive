@@ -9,6 +9,10 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(localizedFormat)
 
+// Same checks as isWriterDocument / isPresentation in @/utils/files, which imports this module
+const isWriterDocument = (entity) => entity?.content_doctype === 'Writer Document'
+const isPresentation = (entity) => entity?.content_doctype === 'Presentation'
+
 export function dynamicList(k) {
   return k.filter((a) => typeof a !== 'object' || !('cond' in a) || a.cond)
 }
@@ -16,9 +20,9 @@ export function dynamicList(k) {
 export function getFileLink(entity, copy = true) {
   let link
   if (entity.file_type === 'Link') link = entity.file_url
-  else if (entity.file_type === 'Presentation') {
+  else if (isPresentation(entity)) {
     link = `${window.location.origin}/slides/presentation/${entity.name}`
-  } else if (entity.file_type === 'Document' || entity.file_type === 'Markdown') {
+  } else if (isWriterDocument(entity)) {
     link = `${window.location.origin}/writer/w/${entity.name}`
   } else {
     link = `${window.location.origin}/drive/${getLinkStem(entity)}`
@@ -37,8 +41,7 @@ function getLinkStem(entity) {
     {
       true: 'f',
       [new Boolean(entity.is_folder)]: 'd',
-      [new Boolean(entity.file_type === 'Document' || entity.file_type === 'Markdown')]:
-        'w',
+      [new Boolean(isWriterDocument(entity))]: 'w',
     }[true]
   }/${entity.name}/${slugger(entity.file_name)}`
 }
@@ -129,12 +132,9 @@ export const openEntity = (entity, new_tab = false) => {
       )
     )
       window.open(entity.file_url, '_blank')
-  } else if (entity.file_type === 'Presentation') {
+  } else if (isPresentation(entity)) {
     window.location.href = '/slides/presentation/' + entity.name
-  } else if (
-    entity.file_type === 'Document' ||
-    entity.file_type === 'Markdown'
-  ) {
+  } else if (isWriterDocument(entity)) {
     window.location.href = '/writer/w/' + entity.name
   } else {
     window.location.href = '/drive/f/' + entity.name

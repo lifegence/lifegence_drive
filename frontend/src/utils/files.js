@@ -144,12 +144,10 @@ export const openEntity = (entity, new_tab = false) => {
       )
     )
       window.open(entity.file_url, '_blank')
-  } else if (entity.file_type === 'Presentation') {
+  } else if (isPresentation(entity)) {
     window.location.href = '/slides/presentation/' + entity.file_url
-  } else if (
-    entity.file_type === 'Document' ||
-    entity.file_type === 'Markdown'
-  ) {
+  } else if (isWriterDocument(entity)) {
+    // Uploaded Office files share the "Document" file type, but only Writer documents open in Writer
     window.location.href = '/writer/w/' + entity.name
   } else {
     router.push({
@@ -549,12 +547,9 @@ export async function updateURLSlug(file_name) {
 export function getLink(entity, copy = true, withDomain = true) {
   let link
   if (entity.file_type === 'Link') link = entity.file_url
-  else if (entity.mime_type === 'frappe/slides') {
+  else if (isPresentation(entity)) {
     link = window.location.origin + '/slides/presentation/' + entity.name
-  } else if (
-    entity.file_type === 'Document' ||
-    entity.file_type === 'Markdown'
-  ) {
+  } else if (isWriterDocument(entity)) {
     link = window.location.origin + '/writer/w/' + entity.name
   } else {
     link = `${
