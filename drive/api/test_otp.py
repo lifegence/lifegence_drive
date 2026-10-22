@@ -1,10 +1,13 @@
-# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2026, Lifegence Corporation and Contributors
 # See license.txt
 
 from unittest.mock import patch
 
 import frappe
-from frappe.tests import IntegrationTestCase
+try:
+    from frappe.tests import IntegrationTestCase
+except ImportError:  # Frappe v15
+    from frappe.tests.utils import FrappeTestCase as IntegrationTestCase
 from frappe.utils import add_to_date, now_datetime
 
 from drive.api.product import verify_otp

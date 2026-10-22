@@ -13,7 +13,13 @@ OTP_VALIDITY_MINUTES = 10
 
 
 def access_app():
-    return True
+    """Show Drive on the apps screen. Set `drive_app_roles` in site config to limit it to those roles."""
+    roles = frappe.conf.get("drive_app_roles")
+    if not roles or frappe.session.user == "Administrator":
+        return True
+    if isinstance(roles, str):
+        roles = [roles]
+    return bool(set(roles) & set(frappe.get_roles()))
 
 
 @frappe.whitelist()
