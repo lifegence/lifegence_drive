@@ -22,7 +22,7 @@ bench set-redis-socketio-host redis:6379
 sed -i '/redis/d' ./Procfile
 sed -i '/watch/d' ./Procfile
 
-bench get-app https://github.com/lifegence/drive --branch lifegence
+bench get-app https://github.com/lifegence/lifegence_drive --branch lifegence
 
 bench new-site drive.localhost \
 --force \

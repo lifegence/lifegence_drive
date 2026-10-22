@@ -33,7 +33,7 @@ don't apply as written. A site would first have to be moved back to the app name
 Requirements: Frappe Framework v15 or v16.
 
 ```bash
-bench get-app https://github.com/lifegence/drive --branch lifegence
+bench get-app https://github.com/lifegence/lifegence_drive --branch lifegence
 bench --site yoursite install-app lifegence_drive
 ```
 
@@ -48,7 +48,7 @@ their data. The app records are renamed, and `bench migrate` applies the upstrea
 ```bash
 bench --site yoursite backup --with-files
 # Replace apps/drive with this repository, as apps/lifegence_drive
-bench get-app https://github.com/lifegence/drive --branch lifegence
+bench get-app https://github.com/lifegence/lifegence_drive --branch lifegence
 bench remove-app drive --no-backup --force   # removes the code only; the site still has the data
 bench --site yoursite migrate-from-drive
 bench --site yoursite migrate

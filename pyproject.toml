@@ -45,5 +45,5 @@ out_dir = "../lifegence_drive/public/frontend"
 index_html_path = "../lifegence_drive/www/drive.html"
 
 [project.urls]
-Repository = "https://github.com/lifegence/drive.git"
+Repository = "https://github.com/lifegence/lifegence_drive.git"
 Upstream = "https://github.com/frappe/drive"
