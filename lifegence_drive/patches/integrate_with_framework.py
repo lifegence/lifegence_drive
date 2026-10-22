@@ -12,6 +12,11 @@ from lifegence_drive.utils.files import get_s3_url
 LEGACY_DOCTYPE = "Drive File"
 
 
+def get_content_column():
+    """The content link is `doc` on develop, but `document` on sites coming from upstream main."""
+    return "doc" if frappe.db.has_column(LEGACY_DOCTYPE, "doc") else "document"
+
+
 def ensure_custom_fields():
     """Drive's File columns ship as fixtures, which sync after pre_model_sync patches.
     Create them up front so the migration below can write to them."""
@@ -68,7 +73,7 @@ def migrate_folder(folder_name, is_remote=False, failures=None):
     migrate_file(get_legacy(folder_name), is_remote, failures)
 
     for child in frappe.get_all(LEGACY_DOCTYPE, filters={"parent_entity": folder_name}, fields=["*"]):
-        if child.is_group or child.doc:
+        if child.is_group or child.get(get_content_column()):
             migrate_folder(child.name, is_remote, failures)
         else:
             migrate_file(child, is_remote, failures)
@@ -108,15 +113,16 @@ def migrate_file(file, is_remote=False, failures=None):
         }
     )
 
-    if file.doc and frappe.db.exists(WRITER_CONTENT_DOCTYPE, file.doc):
+    content_column = get_content_column()
+    if file.get(content_column) and frappe.db.exists(WRITER_CONTENT_DOCTYPE, file.get(content_column)):
         ff_file.content_doctype = WRITER_CONTENT_DOCTYPE
-        ff_file.content_docname = file.doc
+        ff_file.content_docname = file.get(content_column)
 
     if file.mime_type == "frappe/slides" and frappe.db.exists(PRESENTATION_CONTENT_DOCTYPE, file.path):
         ff_file.content_doctype = PRESENTATION_CONTENT_DOCTYPE
         ff_file.content_docname = file.path
 
-    if frappe.db.get_value(LEGACY_DOCTYPE, file.parent_entity, "doc"):
+    if frappe.db.get_value(LEGACY_DOCTYPE, file.parent_entity, content_column):
         ff_file.attached_to_doctype = "File"
         ff_file.attached_to_name = file.parent_entity
 
