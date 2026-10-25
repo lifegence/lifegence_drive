@@ -343,6 +343,10 @@ class FileManager:
         root = get_home_folder(entity.team)
         return Path(storage_key(root["file_url"])) / ".trash" / entity.file_name
 
+    def file_url_for(self, key):
+        """The file_url stored for a storage key: an S3 URL, or /private/files/... on disk."""
+        return get_s3_url(key) if self.s3_enabled else "/" + key.lstrip("/")
+
     @_not_if_flat
     def rename(self, entity):
         if not entity.file_url or entity.mime_type == "frappe/slides":
