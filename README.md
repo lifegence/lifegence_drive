@@ -63,6 +63,8 @@ deletes the Drive DocTypes and their data.
 | Site config key | Default | Effect |
 | --- | --- | --- |
 | `drive_app_roles` | not set | A role name or a list of them, for example `["System Manager"]`. Only users with one of these roles (and Administrator) see Drive on the apps screen. It hides the icon only; file permissions are unchanged. |
+| `drive_collabora_url` | not set | The Collabora Online server, as this site reaches it (for example `https://office.example.com`). When set, Word, Excel and PowerPoint files open for editing in Collabora, previews come from Collabora instead of Microsoft Office Online, and edits keep versions. |
+| `drive_collabora_wopi_base` | the site URL | The URL Collabora uses to reach this site, when it differs from the public one. |
 | `drive_enable_ip_geolocation` | off | When on, sign-up and OTP requests look up the requester's IP address at `pro.ip-api.com`, which is what upstream always did. |
 
 ## Running the tests

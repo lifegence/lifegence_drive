@@ -134,7 +134,8 @@ doc_events = {
     },
     "User": {
 		"after_insert": "lifegence_drive.utils.users.assign_drive_role_and_create_settings",
-	}
+	},
+    "File": {"on_trash": "lifegence_drive.api.versions.on_file_trash"},
 }
 
 
@@ -151,7 +152,11 @@ fixtures = [
 # ---------------
 
 scheduler_events = {
-    "daily": ["lifegence_drive.api.scripts.auto_delete_from_trash", "lifegence_drive.api.scripts.clear_deleted_files"],
+    "daily": [
+        "lifegence_drive.api.scripts.auto_delete_from_trash",
+        "lifegence_drive.api.scripts.clear_deleted_files",
+        "lifegence_drive.api.versions.prune_all",
+    ],
 }
 
 after_request = "lifegence_drive.api.product.after_request"

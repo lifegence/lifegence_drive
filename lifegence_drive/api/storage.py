@@ -74,5 +74,9 @@ def storage_usage(team: str):
         .select(fn.Coalesce(fn.Sum(DriveFile.file_size), 0).as_("total_size"))
     )
     result = query.run(as_dict=True)[0]
+    # Earlier versions of files count too, as in Google Drive
+    from lifegence_drive.api.versions import storage_used
+
+    result["total_size"] = int(result["total_size"] or 0) + storage_used(team, frappe.session.user)
     result["limit"] = frappe.get_value("Drive Team", team, "quota") * MEGA_BYTE
     return result

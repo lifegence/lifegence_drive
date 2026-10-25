@@ -16,7 +16,6 @@ import hashlib
 import hmac
 import json
 import os
-import shutil
 import time
 import uuid
 from datetime import UTC
@@ -30,9 +29,10 @@ from frappe import _
 from frappe.utils.password import get_encryption_key
 from werkzeug.wrappers import Response
 
+from lifegence_drive.api import versions
 from lifegence_drive.api.permissions import user_has_permission
 from lifegence_drive.utils import update_file_size
-from lifegence_drive.utils.files import FileManager, storage_key
+from lifegence_drive.utils.files import FileManager
 
 TOKEN_TTL = 10 * 60 * 60  # seconds; Collabora refreshes the editor before it runs out
 DISCOVERY_TTL = 60 * 60
@@ -192,6 +192,10 @@ def _iso(dt) -> str:
 
 def check_file_info(file):
     user = frappe.session.user
+    can_write = bool(user_has_permission(file, "write"))
+    if can_write:
+        # Collabora calls this for each person who joins, so co-editors are all recorded
+        versions.note_editor(file, user)
     return _json(
         {
             "BaseFileName": file.file_name,
@@ -199,7 +203,7 @@ def check_file_info(file):
             "OwnerId": file.owner,
             "UserId": user,
             "UserFriendlyName": frappe.utils.get_fullname(user),
-            "UserCanWrite": bool(user_has_permission(file, "write")),
+            "UserCanWrite": can_write,
             "UserCanNotWriteRelative": True,
             "SupportsUpdate": True,
             "SupportsLocks": False,
@@ -232,13 +236,8 @@ def put_file(file, request):
     with open(temp_path, "wb") as f:
         f.write(content)
 
-    if not manager.s3_enabled:
-        # PoC: keep the previous content next to the uploads folder
-        backup_dir = os.path.join(uploads, "..", ".collabora-backup")
-        os.makedirs(backup_dir, exist_ok=True)
-        current = manager.site_folder / storage_key(file.file_url)
-        if current.exists():
-            shutil.copy2(current, os.path.join(backup_dir, f"{file.name}-{int(time.time())}"))
+    # Keep the content being replaced if this save starts a new editing session
+    versions.before_overwrite(file, frappe.session.user, manager)
 
     from pathlib import Path
 

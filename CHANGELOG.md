@@ -65,6 +65,16 @@ function.
 
 ### Added
 
+- Optional editing of Word, Excel and PowerPoint files in Collabora Online, through WOPI. It is off
+  unless the site config sets `drive_collabora_url`; Office previews then come from Collabora
+  instead of Microsoft Office Online.
+- Versions of files edited in Collabora, modelled on Google Drive. Collabora saves often and merges
+  everyone's changes, so versions are cut per file by editing session (a new one after 30 quiet
+  minutes, at most 2 hours long) and record everyone who edited. Unnamed versions are deleted after
+  30 days or once 100 newer ones exist; named ones (up to 40 per file) are kept. Versions count
+  toward the file owner's storage and are deleted with the file. Only people who can edit a file
+  can list, name, download or restore its versions (`lifegence_drive.api.versions`); restoring keeps
+  the replaced content as a version, and is refused while someone is editing.
 - Carried over from 0.3.2: the site config key `drive_app_roles` limits who sees Drive on the apps
   screen.
 
