@@ -21,6 +21,10 @@ dependencies = [
     "html2text==2025.4.15"
 ]
 
+# Press reads the supported Frappe versions from here
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0 <17.0.0"
+
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
