@@ -64,7 +64,10 @@ class DriveFile(Document):
 
     def get_children(self):
         """Return a generator that yields child Documents."""
-        child_names = frappe.get_list(self.doctype, filters={"parent_entity": self.name}, pluck="name")
+        # get_list would filter by the caller's roles, so people who reach this folder only
+        # through Drive sharing would get no children, and moves would leave their paths stale.
+        # Access to the folder itself is checked by the caller.
+        child_names = frappe.get_all(self.doctype, filters={"parent_entity": self.name}, pluck="name")
         for name in child_names:
             yield frappe.get_doc(self.doctype, name)
 
@@ -205,7 +208,7 @@ class DriveFile(Document):
             not_in_disk = child.mime_type == "frappe/slides" or child.is_link
             if child.path and not not_in_disk:
                 child.recursive_path_move(child.path, str(Path(new) / Path(child.path).relative_to(old)))
-        self.save()
+        self.save(ignore_permissions=True)
 
     @frappe.whitelist()
     def change_color(self, new_color):

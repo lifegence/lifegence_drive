@@ -84,4 +84,5 @@ jobs:
         run: |
           bench --site test_site run-tests --module drive.api.test_controller_method
           bench --site test_site run-tests --module drive.api.test_otp
+          bench --site test_site run-tests --module drive.api.test_folder_rename
           bench --site test_site run-tests --module drive.api.test_access_app
