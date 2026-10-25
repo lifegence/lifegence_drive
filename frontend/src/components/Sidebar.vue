@@ -297,6 +297,7 @@ const sidebarItems = computed(() => {
           icon: LucideFileText,
           isActive: first.name == 'Documents',
           accessKey: 'd',
+          cond: apps.data?.find?.((k) => k.name === 'writer'),
         },
         {
           label: 'Presentations',

@@ -25,6 +25,17 @@ Changes made by Lifegence Corporation to Frappe Drive. Since 0.4.0 they are on t
 - Uploads whose names have no ASCII characters before the extension (for example `提案書.docx`)
   failed, because the type was detected from a temporary name without the extension.
 - Invitation links point to the new method path.
+- Creating a folder failed on sites that don't use the flat disk layout: the path was built from the
+  parent's file URL and became absolute.
+- Uploaded Word and PowerPoint files couldn't be downloaded from the menu, because they share their
+  type with Writer and Slides documents. Only the latter are excluded now.
+- "Delete forever" failed: the confirm dialog sent the file list as a JSON string, which the typed
+  API rejected. It sends a list now, and the API accepts both.
+- The Move button was disabled exactly when a different folder was chosen.
+- The "With you" tab on Shared never loaded: switching tabs didn't fetch the new list.
+- "Document" no longer appears in the Create menu when the Writer app isn't installed, the same as
+  "Presentation" without Slides.
+- Opening a public link without logging in no longer fails to record the visit.
 
 ### Compatibility
 

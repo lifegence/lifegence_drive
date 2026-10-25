@@ -144,8 +144,8 @@ const updateResource = createResource({
     return {
       entity_names:
         typeof props.entities === 'string'
-          ? JSON.stringify([props.entities])
-          : JSON.stringify(props.entities.map((entity) => entity.name)),
+          ? [props.entities]
+          : props.entities.map((entity) => entity.name),
     }
   },
   onSuccess(data) {
