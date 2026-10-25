@@ -35,7 +35,7 @@ Changes made by Lifegence Corporation to Frappe Drive. Since 0.4.0 they are on t
 - The "With you" tab on Shared never loaded: switching tabs didn't fetch the new list.
 - "Document" no longer appears in the Create menu when the Writer app isn't installed, the same as
   "Presentation" without Slides.
-- Opening a public link without logging in no longer fails to record the visit.
+- Opening a public link without logging in no longer calls the visit tracker, which needs a login.
 
 ### Compatibility
 

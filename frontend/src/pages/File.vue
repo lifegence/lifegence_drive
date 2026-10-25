@@ -111,7 +111,8 @@ const onSuccess = async (entity) => {
   document.title = entity.file_name
   setBreadCrumbs(entity)
   updateURLSlug(entity.file_name)
-  trackVisit.submit({ entity_name: entity.name })
+  // Visitors on a public link have no history to record
+  if (store.getters.isLoggedIn) trackVisit.submit({ entity_name: entity.name })
 }
 
 const trackVisit = createResource({

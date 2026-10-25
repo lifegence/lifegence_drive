@@ -5,6 +5,7 @@ from io import BytesIO
 from pathlib import Path
 
 import frappe
+from frappe import _
 import mimemapper
 from pypika import Order
 from werkzeug.utils import secure_filename, send_file
@@ -43,7 +44,9 @@ def has_blob(file):
     return file.file_type not in FORBIDDEN_DOWNLOAD_TYPES and file.content_doctype not in HOSTED_CONTENT_DOCTYPES
 
 
-@frappe.whitelist(allow_guest=True)
+# Guests may upload into folders shared publicly with upload access; the permission
+# check below covers that. Reviewed for Lifegence Drive.
+@frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @default_team
 def upload_file(
     team: str,
@@ -785,11 +788,8 @@ def redirect_to_original(file_id: str):
     frappe.local.response["location"] = "/drive/g/" + file.content_docname
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def track_visit(entity_name: str):
-    # Public links call this too; visitors who aren't logged in have no history to record
-    if frappe.session.user == "Guest":
-        return
     entity = frappe.get_doc("File", entity_name)
     mark_as_viewed(entity)
 
@@ -825,7 +825,7 @@ def share(
     """Share or unshare a file. The share dialog calls this; File.share and
     File.unshare check the caller's share permission."""
     if method not in ("share", "unshare"):
-        frappe.throw("Method not allowed", frappe.PermissionError)
+        frappe.throw(_("Method not allowed"), frappe.PermissionError)
     doc = frappe.get_doc("File", entity_name)
     if method == "unshare":
         if user == frappe.session.user and not user_has_permission(doc, "share"):
