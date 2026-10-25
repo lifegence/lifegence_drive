@@ -42,6 +42,9 @@ Changes made by Lifegence Corporation to Frappe Drive. Since 0.4.0 they are on t
   then the change is saved; the quota check no longer needs membership.
 - Renaming, moving or permanently deleting a folder now reaches everything inside it for those
   people too (children were looked up with the caller's role filter and came back empty).
+- On a non-flat disk, renaming or moving a folder stored its new location without the leading
+  `/` that uploads use (`private/files/...`). Renaming that folder again after uploading into it
+  failed. Locations are now always stored as `/private/files/...`.
 
 ### Compatibility
 
