@@ -24,7 +24,7 @@ from lifegence_drive.utils import (
     STATUS_ACTIVE,
     STATUS_REMOVED,
 )
-from lifegence_drive.utils.files import FileManager
+from lifegence_drive.utils.files import FileManager, storage_key
 import mimemapper
 
 
@@ -300,7 +300,6 @@ class File(FrappeFile):
             new_path = self.manager.get_disk_path(self)
             self.manager.move(self, str(new_path))
             self.recursive_path_move(self.file_url, new_path)
-            self.file_url = new_path
         self.save(ignore_permissions=True)
 
         return frappe.get_value("File", new_parent, ["file_name", "team", "name", "folder"], as_dict=True)
@@ -382,12 +381,17 @@ class File(FrappeFile):
         return FileManager()
 
     def recursive_path_move(self, old, new):
-        if new:
-            self.file_url = new
+        # old is a stored file_url and new a storage key from get_disk_path; compare keys
+        # and store the new one as a file_url, the form uploads use
+        if not new:
+            self.save(ignore_permissions=True)
+            return
+        old_key, new_key = storage_key(old), storage_key(new)
+        self.file_url = self.manager.file_url_for(new_key)
         for child in self.get_children():
             if not child._not_in_disk():
                 child.recursive_path_move(
-                    child.file_url, str(Path(new) / Path(child.file_url).relative_to(old))
+                    child.file_url, str(Path(new_key) / Path(storage_key(child.file_url)).relative_to(old_key))
                 )
         self.save(ignore_permissions=True)
 

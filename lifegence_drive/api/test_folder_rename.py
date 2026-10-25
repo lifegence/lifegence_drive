@@ -76,7 +76,7 @@ class TestFolderRename(IntegrationTestCase):
         self.assertIn("Archive", inner.file_url)
         self.assertTrue(on_disk(inner.file_url), inner.file_url)
 
-    def test_upload_into_a_shared_folder(self):
+    def upload(self, parent, name, data):
         from io import BytesIO
         from unittest.mock import patch
 
@@ -84,10 +84,35 @@ class TestFolderRename(IntegrationTestCase):
 
         from lifegence_drive.api.files import upload_file
 
+        req = frappe._dict(files={"file": FileStorage(stream=BytesIO(data), filename=name)})
+        uuid = frappe.generate_hash(length=8)
+        with patch.object(frappe, "request", req, create=True), patch.dict(frappe.form_dict, {"uuid": uuid}, clear=True):
+            return upload_file(frappe.db.get_value("File", parent, "team"), len(data), parent=parent)
+
+    def test_upload_into_a_shared_folder(self):
         frappe.set_user(EDITOR)
-        data = b"shared upload"
-        req = frappe._dict(files={"file": FileStorage(stream=BytesIO(data), filename="メモ.txt")})
-        with patch.object(frappe, "request", req, create=True), patch.dict(frappe.form_dict, {"uuid": "t1"}, clear=True):
-            doc = upload_file(frappe.db.get_value("File", self.top.name, "team"), len(data), parent=self.folder.name)
+        doc = self.upload(self.folder.name, "メモ.txt", b"shared upload")
         self.assertEqual(doc.folder, self.folder.name)
         self.assertEqual(doc.owner, EDITOR)
+
+    def test_rename_and_move_keep_file_urls_in_the_stored_form(self):
+        frappe.set_user(EDITOR)
+        rename(self.folder.name, "Designs v1")
+        target = create_folder(frappe.db.get_value("File", self.top.name, "team"), "Archive", self.top.name)
+        move([self.inner.name], new_parent=target.name)
+        for name in (self.folder.name, self.inner.name):
+            url = frappe.db.get_value("File", name, "file_url")
+            self.assertTrue(url.startswith("/private/files/"), url)
+            self.assertTrue(on_disk(url), url)
+
+    def test_rename_again_after_an_upload(self):
+        # A renamed folder used to keep its file_url without the leading slash, while new
+        # uploads in it had one, so renaming it again failed on the mismatch
+        frappe.set_user(EDITOR)
+        rename(self.folder.name, "Designs v1")
+        doc = self.upload(self.folder.name, "週報.txt", b"weekly")
+        rename(self.folder.name, "Designs v2")
+        url = frappe.db.get_value("File", doc.name, "file_url")
+        self.assertIn("/Designs v2/", url)
+        self.assertTrue(url.startswith("/private/files/"), url)
+        self.assertTrue(on_disk(url), url)
