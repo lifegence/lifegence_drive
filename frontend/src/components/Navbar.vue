@@ -97,6 +97,7 @@ import { ref, computed, inject, h } from 'vue'
 import { entitiesDownload } from '@/utils/download'
 import { getRecents, getTrash, toggleFav } from '@/resources/files'
 import { apps } from '@/resources/permissions'
+import { canUseCollabora, openInCollabora } from '@/resources/collabora'
 import { useRoute } from 'vue-router'
 import {
   newExternal,
@@ -178,6 +179,12 @@ const defaultActions = computed(() => {
             )
           },
           isEnabled: () => isAttachmentRef(rootEntity.value),
+        },
+        {
+          label: __('Edit in Collabora'),
+          icon: LucideFilePen,
+          isEnabled: () => canUseCollabora(rootEntity.value),
+          onClick: () => openInCollabora(rootEntity.value),
         },
         {
           label: __('Download'),

@@ -1206,3 +1206,6 @@ msgstr ""
 msgid "upload"
 msgstr "アップロード"
 
+
+msgid "Edit in Collabora"
+msgstr "Collabora で編集"

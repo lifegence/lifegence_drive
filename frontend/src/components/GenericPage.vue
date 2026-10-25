@@ -57,6 +57,7 @@ import { LoadingIndicator } from 'frappe-ui'
 import { settings } from '@/resources/permissions'
 import emitter from '@/emitter'
 import { getFileLink } from '@/ui/drive/js/utils'
+import { canUseCollabora, openInCollabora } from '@/resources/collabora'
 
 import LucideClock from '~icons/lucide/clock'
 import LucideDownload from '~icons/lucide/download'
@@ -260,6 +261,12 @@ const actionItems = computed(() => {
         icon: LucideEye,
         action: ([entity]) => openEntity(entity),
         isEnabled: (e) => e.file_type !== 'Link' && !isVirtual(e),
+      },
+      {
+        label: __('Edit in Collabora'),
+        icon: LucideFilePen,
+        action: ([entity]) => openInCollabora(entity),
+        isEnabled: (e) => canUseCollabora(e),
       },
       {
         label: __('Open'),

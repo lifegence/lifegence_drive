@@ -26,6 +26,7 @@ from zoneinfo import ZoneInfo
 
 import frappe
 import requests
+from frappe import _
 from frappe.utils.password import get_encryption_key
 from werkzeug.wrappers import Response
 
@@ -128,6 +129,47 @@ def get_editor(entity_name: str):
         "can_write": can_write,
         "file_name": file_name,
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def settings():
+    """What the frontend needs to offer Collabora: whether it's on and which extensions it edits."""
+    if not collabora_url():
+        return {"enabled": False, "extensions": []}
+    try:
+        exts = sorted(ext for ext, actions in discovery().items() if "edit" in actions)
+    except Exception:
+        frappe.log_error("Drive: could not read Collabora discovery")
+        return {"enabled": False, "extensions": []}
+    return {"enabled": True, "extensions": exts}
+
+
+@frappe.whitelist()
+def preview_pdf(entity_name: str):
+    """Render an Office file as PDF with Collabora, so previews stay on our servers."""
+    if not collabora_url():
+        frappe.throw(_("Collabora is not configured on this site."))
+    if not user_has_permission(entity_name, "read"):
+        raise frappe.PermissionError(_("You do not have permission to view this file"))
+    file = frappe.get_doc("File", entity_name)
+    cache_key = f"lifegence_drive:collabora_pdf:{file.name}:{file.modified}"
+    pdf = frappe.cache.get_value(cache_key)
+    if not pdf:
+        data = FileManager().get_file(file).read()
+        r = requests.post(
+            f"{collabora_url()}/cool/convert-to/pdf",
+            files={"data": (file.file_name, data)},
+            timeout=120,
+        )
+        if r.status_code != 200:
+            frappe.throw(_("The preview could not be generated."))
+        pdf = r.content
+        frappe.cache.set_value(cache_key, pdf, expires_in_sec=6 * 60 * 60)
+    # Frappe mangles non-ASCII names in this header, and the name is never shown
+    frappe.local.response.filename = "preview.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "pdf"
+    frappe.local.response.display_content_as = "inline"
 
 
 # WOPI endpoints, served through the page_renderer hook
