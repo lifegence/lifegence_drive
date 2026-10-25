@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ lang or 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ editor.file_name }}</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #fff; }
+    iframe { border: 0; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <form id="office_form" action="{{ editor.action_url }}" method="post" target="office_frame">
+    <input name="access_token" value="{{ editor.access_token }}" type="hidden">
+    <input name="access_token_ttl" value="{{ editor.access_token_ttl }}" type="hidden">
+  </form>
+  <iframe id="office_frame" name="office_frame" title="{{ editor.file_name }}"
+    allow="clipboard-read *; clipboard-write *; fullscreen"></iframe>
+  <script>
+    document.getElementById("office_form").submit();
+    // Close button in Collabora returns to Drive
+    window.addEventListener("message", function (e) {
+      try {
+        var msg = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (msg && msg.MessageId === "UI_Close") window.location.href = "{{ back_url }}";
+      } catch (err) {}
+    });
+  </script>
+</body>
+</html>
