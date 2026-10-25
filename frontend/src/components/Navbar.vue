@@ -184,7 +184,8 @@ const defaultActions = computed(() => {
           icon: LucideDownload,
           isEnabled: () =>
             !isVirtual(rootEntity.value) &&
-            !['Link', 'Presentation', 'Document'].includes(rootEntity.value.file_type),
+            rootEntity.value.file_type !== 'Link' &&
+            !['Writer Document', 'Presentation'].includes(rootEntity.value.content_doctype),
           onClick: () => entitiesDownload([rootEntity.value]),
         },
         {
@@ -297,6 +298,8 @@ const newEntityOptions = computed(() => [
         label: 'Document',
         icon: LucideFilePlus2,
         onClick: () => newExternal('Document'),
+        // Documents are created by the Writer app; without it the request fails
+        cond: apps.data?.find?.((k) => k.name === 'writer'),
       },
       {
         label: 'Presentation',

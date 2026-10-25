@@ -197,7 +197,8 @@ const refreshData = () => {
 }
 
 watch(
-  [verifyAccess, team],
+  // The resource changes when a page switches source, e.g. Shared → "With you"
+  [verifyAccess, team, () => props.getEntities],
   ([data]) => {
     if (!data) return
     refreshData()
@@ -286,7 +287,10 @@ const actionItems = computed(() => {
         // nodes and non-downloadable types are excluded.
         isEnabled: (e) =>
           !isVirtual(e) &&
-          !['Link', 'Presentation', 'Document'].includes(e.file_type),
+          // Uploaded Word and PowerPoint files share these types with Writer and Slides
+          // documents; only the latter (which have a content doctype) can't be downloaded
+          e.file_type !== 'Link' &&
+          !['Writer Document', 'Presentation'].includes(e.content_doctype),
         action: (entities) => entitiesDownload(entities),
         multi: true,
         important: true,

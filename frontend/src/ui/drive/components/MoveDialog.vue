@@ -195,8 +195,7 @@
             class="ml-auto"
             size="sm"
             :disabled="
-              entities[0].folder !== selected &&
-              chosenTeam === entities[0].team
+              entities[0].folder === selected && chosenTeam === entities[0].team
             "
             :loading="move.loading"
             @click="moveFile"

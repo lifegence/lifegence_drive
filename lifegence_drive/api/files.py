@@ -605,7 +605,7 @@ def remove_or_restore(entity_names: list[str] | str):
 
 
 @frappe.whitelist()
-def delete_entities(entity_names: list[str] | None = None, clear_all: bool = False):
+def delete_entities(entity_names: list[str] | str | None = None, clear_all: bool = False):
     if clear_all:
         entity_names = frappe.db.get_list("File", {"status": STATUS_TRASHED, "owner": frappe.session.user}, pluck="name")
     elif isinstance(entity_names, str):
@@ -785,8 +785,11 @@ def redirect_to_original(file_id: str):
     frappe.local.response["location"] = "/drive/g/" + file.content_docname
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def track_visit(entity_name: str):
+    # Public links call this too; visitors who aren't logged in have no history to record
+    if frappe.session.user == "Guest":
+        return
     entity = frappe.get_doc("File", entity_name)
     mark_as_viewed(entity)
 
