@@ -20,6 +20,7 @@ import shutil
 from datetime import timedelta
 
 import frappe
+from frappe import _
 from frappe.utils import get_datetime, now_datetime
 from werkzeug.utils import send_file
 
@@ -226,7 +227,7 @@ def storage_used(team, user):
 def _editable_file(entity_name):
     file = frappe.get_doc("File", entity_name)
     if file.is_folder or file.status != STATUS_ACTIVE or not user_has_permission(file, "write"):
-        raise frappe.PermissionError("Only people who can edit this file can see its versions.")
+        raise frappe.PermissionError(_("Only people who can edit this file can see its versions."))
     return file
 
 
@@ -268,7 +269,7 @@ def name_version(version: str, label: str = ""):
     if label and not doc.label:
         named = frappe.db.count(VERSION, {"file": file.name, "label": ["is", "set"]})
         if named >= NAMED_MAX:
-            frappe.throw(f"A file can have at most {NAMED_MAX} named versions.")
+            frappe.throw(_("A file can have at most {0} named versions.").format(NAMED_MAX))
     frappe.db.set_value(VERSION, doc.name, "label", label)
     if not label:
         prune(file.name)
@@ -283,7 +284,7 @@ def restore_version(version: str):
     session = frappe.db.get_value(SESSION, file.name, ["started", "last_saved", "editors"], as_dict=True)
     if session and session.last_saved and now - get_datetime(session.last_saved) < RESTORE_QUIET:
         frappe.throw(
-            "Someone is editing this file. Try again when they have finished.", frappe.ValidationError
+            _("Someone is editing this file. Try again when they have finished."), frappe.ValidationError
         )
     manager = FileManager()
     editors = session.editors if session and session.started else file.owner

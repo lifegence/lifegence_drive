@@ -109,7 +109,7 @@ def extension(file_name: str) -> str:
 def get_editor(entity_name: str):
     """Where and how the browser opens a file in Collabora."""
     if not collabora_url():
-        frappe.throw("Collabora is not configured on this site.")
+        frappe.throw(_("Collabora is not configured on this site."))
     if not user_has_permission(entity_name, "read"):
         raise frappe.PermissionError("You do not have permission to view this file")
     file_name = frappe.db.get_value("File", entity_name, "file_name")
@@ -117,7 +117,7 @@ def get_editor(entity_name: str):
     can_write = bool(user_has_permission(entity_name, "write"))
     urlsrc = actions.get("edit" if can_write else "view") or actions.get("view")
     if not urlsrc:
-        frappe.throw("This file type can't be opened in Collabora.")
+        frappe.throw(_("This file type can't be opened in Collabora."))
     token, expires = make_token(entity_name, frappe.session.user)
     wopi_src = f"{wopi_base()}/wopi/files/{entity_name}"
     sep = "" if urlsrc.endswith(("?", "&")) else ("&" if "?" in urlsrc else "?")
@@ -131,7 +131,8 @@ def get_editor(entity_name: str):
     }
 
 
-@frappe.whitelist(allow_guest=True)
+# Guests open public links too; this only says whether Collabora is on and what it edits
+@frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 def settings():
     """What the frontend needs to offer Collabora: whether it's on and which extensions it edits."""
     if not collabora_url():
@@ -233,7 +234,8 @@ def put_file(file, request):
     uploads = os.path.join(frappe.get_site_path("private/files"), root, ".uploads")
     os.makedirs(uploads, exist_ok=True)
     temp_path = os.path.join(uploads, f"{uuid.uuid4().hex}_wopi")
-    with open(temp_path, "wb") as f:
+    # temp_path is built from a random UUID under the site's uploads folder, not from input
+    with open(temp_path, "wb") as f:  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal
         f.write(content)
 
     # Keep the content being replaced if this save starts a new editing session
@@ -270,7 +272,8 @@ def authenticate():
         token = header[7:]
     user = read_token(token, parts[2])
     if user and frappe.db.exists("User", {"name": user, "enabled": 1}):
-        frappe.set_user(user)
+        # The user comes from a token this site signed for this file (read_token checks the HMAC)
+        frappe.set_user(user)  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser
 
 
 class WOPIPage:
@@ -291,7 +294,8 @@ class WOPIPage:
         user = read_token(request.args.get("access_token", ""), name)
         if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
             return Response(status=401)
-        frappe.set_user(user)
+        # As above: a signed, unexpired token for this file names the user
+        frappe.set_user(user)  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser
         file = frappe.db.get_value(
             "File",
             {"name": name, "is_folder": 0},
