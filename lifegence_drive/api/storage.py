@@ -57,6 +57,12 @@ def storage_bar_data(team: str | None = None, entity_name: str | None = None):
     if team not in get_teams():
         frappe.throw(_("You don't have access to this team."), frappe.PermissionError)
 
+    return storage_usage(team)
+
+
+def storage_usage(team: str):
+    """The caller's usage and the team's quota. Internal: callers check access themselves,
+    since people a folder is shared with aren't members of its team."""
     query = (
         frappe.qb.from_(DriveFile)
         .where(

@@ -85,3 +85,4 @@ jobs:
           bench --site test_site run-tests --module lifegence_drive.api.test_otp
           bench --site test_site run-tests --module lifegence_drive.api.test_access_app
           bench --site test_site run-tests --module lifegence_drive.api.test_legacy_routes
+          bench --site test_site run-tests --module lifegence_drive.api.test_folder_rename
