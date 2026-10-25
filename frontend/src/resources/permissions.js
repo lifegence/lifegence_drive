@@ -14,19 +14,19 @@ export const updateAccess = createResource({
 })
 
 export const notifCount = createResource({
-  url: '/api/method/drive.api.notifications.get_unread_count',
+  url: '/api/method/lifegence_drive.api.notifications.get_unread_count',
   method: 'GET',
   cache: 'notif-count',
 })
 
 export const settings = createResource({
-  url: '/api/method/drive.api.product.get_settings',
+  url: '/api/method/lifegence_drive.api.product.get_settings',
   method: 'GET',
   cache: 'settings',
 })
 
 export const setSettings = createResource({
-  url: '/api/method/drive.api.product.set_settings',
+  url: '/api/method/lifegence_drive.api.product.set_settings',
   method: 'POST',
   onSuccess: () => {
     settings.fetch()

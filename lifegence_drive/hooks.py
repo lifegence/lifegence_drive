@@ -159,9 +159,8 @@ after_request = "lifegence_drive.api.product.after_request"
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "drive.event.get_events"
-# }
+# Keep links and stored URLs that use the old drive.api.* paths working
+from lifegence_drive.legacy_routes import override_whitelisted_methods  # noqa: E402, F401
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -234,6 +233,8 @@ ALLOWED_PATHS = [
 ]
 
 ALLOWED_WILDCARD_PATHS = [
+    "/api/method/lifegence_drive.api.",
+    # Old paths from the drive app, mapped by override_whitelisted_methods below
     "/api/method/drive.api.",
 ]
 

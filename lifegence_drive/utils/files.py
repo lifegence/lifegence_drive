@@ -13,7 +13,9 @@ from lifegence_drive.locks.distributed_lock import DistributedLock
 
 from . import get_home_folder, STATUS_ACTIVE
 
-S3_URL_PREFIX = "/api/method/drive.api.s3.fetch?path="
+S3_URL_PREFIX = "/api/method/lifegence_drive.api.s3.fetch?path="
+# Stored by the drive app before the rename
+LEGACY_S3_URL_PREFIX = "/api/method/drive.api.s3.fetch?path="
 
 
 def _get_s3_client(settings):
@@ -438,8 +440,9 @@ def storage_key(file_url):
     # file_url -> backend storage key, always relative so `base / key` can't
     # reset to an absolute path (Path("a") / "/b" == Path("/b")).
     file_url = str(file_url)
-    if file_url.startswith(S3_URL_PREFIX):
-        return unquote(file_url[len(S3_URL_PREFIX) :])
+    for prefix in (S3_URL_PREFIX, LEGACY_S3_URL_PREFIX):
+        if file_url.startswith(prefix):
+            return unquote(file_url[len(prefix) :])
     return file_url.lstrip("/")
 
 

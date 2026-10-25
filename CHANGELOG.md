@@ -15,6 +15,23 @@ Changes made by Lifegence Corporation to Frappe Drive. Since 0.4.0 they are on t
   `bench --site <site> migrate-from-drive` (see the README).
 - The app title and publisher now name Lifegence Corporation.
 
+### Fixed
+
+- The frontend still called the old `/api/method/drive.api.*` paths after the rename, so uploads,
+  previews, settings, team lists and folder downloads failed in the browser. It now calls
+  `lifegence_drive.api.*`.
+- The share dialog called `files.share`, which upstream `develop` never defined. It now exists and
+  accepts only `share` and `unshare`; people can always remove their own access.
+- Uploads whose names have no ASCII characters before the extension (for example `提案書.docx`)
+  failed, because the type was detected from a temporary name without the extension.
+- Invitation links point to the new method path.
+
+### Compatibility
+
+- Old `drive.api.*` method paths keep working and are mapped to `lifegence_drive.api.*`, so
+  invitation emails, images embedded in documents and S3 file URLs created by the `drive` app
+  still resolve (`lifegence_drive/legacy_routes.py`).
+
 ### Security
 
 Carried over from 0.3.1:

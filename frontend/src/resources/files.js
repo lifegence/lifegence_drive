@@ -37,7 +37,7 @@ export const getFiles = createResource({
 })
 
 export const getTeams = createResource({
-  url: '/api/method/drive.api.permissions.get_teams',
+  url: '/api/method/lifegence_drive.api.permissions.get_teams',
   params: {
     details: 1,
   },
@@ -328,7 +328,7 @@ export const move = createResource({
 
 export const translate = createResource({
   method: 'GET',
-  url: '/api/method/drive.api.files.translate_old_name',
+  url: '/api/method/lifegence_drive.api.files.translate_old_name',
 })
 
 export const storageBar = createResource({

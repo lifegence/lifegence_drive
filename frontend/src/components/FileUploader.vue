@@ -113,7 +113,7 @@ onMounted(() => {
     hiddenInputContainer: '#fileSelection',
     // Do we want to allow multi uploads?
     chunking: true,
-    url: '/api/method/drive.api.files.upload_file',
+    url: '/api/method/lifegence_drive.api.files.upload_file',
     dictUploadCanceled: 'Upload canceled by user',
     maxFilesize: 10 * 1024, // 10GB
     timeout: 120000, // 2 minutes
