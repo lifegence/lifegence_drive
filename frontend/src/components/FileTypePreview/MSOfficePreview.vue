@@ -1,6 +1,13 @@
 <template>
+  <!-- With Collabora, previews are rendered on our own servers -->
   <iframe
-    v-if="warned && jwt_token"
+    v-if="useCollabora"
+    :src="collaboraPreviewUrl(previewEntity)"
+    class="w-4/5 mx-auto h-full"
+    frameborder="0"
+  />
+  <iframe
+    v-else-if="warned && jwt_token"
     :src="'https://view.officeapps.live.com/op/embed.aspx?src=' + srcUrl"
     class="w-4/5 mx-auto h-full"
     frameborder="0"
@@ -34,9 +41,11 @@
 </template>
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { canUseCollabora, collaboraPreviewUrl } from '@/resources/collabora'
 const props = defineProps({
   previewEntity: Object,
 })
+const useCollabora = computed(() => canUseCollabora(props.previewEntity))
 
 const warned = ref(false)
 watch(warned, async () => {
@@ -62,5 +71,6 @@ const srcUrl = computed(() =>
     ).href
   )
 )
-const download = () => (window.location.ref = srcUrl.value)
+const download = () =>
+  (window.location.href = `/api/method/lifegence_drive.api.files.get_file_content?entity_name=${encodeURIComponent(props.previewEntity.name)}&trigger_download=1`)
 </script>

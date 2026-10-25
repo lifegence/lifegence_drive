@@ -1206,3 +1206,21 @@ msgstr ""
 msgid "upload"
 msgstr "アップロード"
 
+
+msgid "Edit in Collabora"
+msgstr "Collabora で編集"
+
+msgid "Collabora is not configured on this site."
+msgstr "このサイトでは Collabora が設定されていません。"
+
+msgid "This file type can't be opened in Collabora."
+msgstr "この種類のファイルは Collabora で開けません。"
+
+msgid "A file can have at most {0} named versions."
+msgstr "名前を付けられる版は、1つのファイルにつき {0} 個までです。"
+
+msgid "Someone is editing this file. Try again when they have finished."
+msgstr "このファイルを編集中の人がいます。編集が終わってから、もう一度お試しください。"
+
+msgid "Only people who can edit this file can see its versions."
+msgstr "版を見られるのは、このファイルを編集できる人だけです。"

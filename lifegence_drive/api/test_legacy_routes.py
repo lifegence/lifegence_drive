@@ -15,11 +15,13 @@ from lifegence_drive.legacy_routes import LEGACY_METHODS
 from lifegence_drive.utils.files import storage_key
 
 API = Path(__file__).parent
+# Modules added in Lifegence Drive: nothing ever called them under drive.api.*
+NEW_MODULES = {"versions", "wopi"}
 
 
 def whitelisted_functions():
     for f in sorted(API.glob("*.py")):
-        if f.name.startswith("test_") or f.name == "__init__.py":
+        if f.name.startswith("test_") or f.name == "__init__.py" or f.stem in NEW_MODULES:
             continue
         for node in ast.parse(f.read_text()).body:
             if isinstance(node, ast.FunctionDef) and any(
