@@ -301,7 +301,7 @@ class File(FrappeFile):
             self.manager.move(self, str(new_path))
             self.recursive_path_move(self.file_url, new_path)
             self.file_url = new_path
-        self.save()
+        self.save(ignore_permissions=True)
 
         return frappe.get_value("File", new_parent, ["file_name", "team", "name", "folder"], as_dict=True)
 
@@ -359,7 +359,7 @@ class File(FrappeFile):
         if self.file_url and not self._not_in_disk():
             self.recursive_path_move(self.file_url, path)
 
-        self.save()
+        self.save(ignore_permissions=True)
 
     def permanent_delete(self):
         write_access = user_has_permission(self, "write")
@@ -371,9 +371,12 @@ class File(FrappeFile):
         if self.is_folder:
             for child in self.get_children():
                 child.permanent_delete()
-        self.save()
+        self.save(ignore_permissions=True)
 
     # Utils
+    # Methods that change a file check Drive permissions (user_has_permission) first and then
+    # save with ignore_permissions: Drive shares grant access that Frappe's File role
+    # permissions don't know about, so a plain save would refuse people a file was shared with.
     @property
     def manager(self):
         return FileManager()
@@ -386,11 +389,13 @@ class File(FrappeFile):
                 child.recursive_path_move(
                     child.file_url, str(Path(new) / Path(child.file_url).relative_to(old))
                 )
-        self.save()
+        self.save(ignore_permissions=True)
 
     def get_children(self):
         """Returns a generator that yields child Documents."""
-        child_names = frappe.get_list(self.doctype, filters={"folder": self.name}, pluck="name")
+        # get_list would filter by the caller's roles, so people who reach this folder only
+        # through Drive sharing would get no children. Access is checked by the caller.
+        child_names = frappe.get_all(self.doctype, filters={"folder": self.name}, pluck="name")
         for name in child_names:
             yield frappe.get_doc(self.doctype, name)
 

@@ -36,6 +36,12 @@ Changes made by Lifegence Corporation to Frappe Drive. Since 0.4.0 they are on t
 - "Document" no longer appears in the Create menu when the Writer app isn't installed, the same as
   "Presentation" without Slides.
 - Opening a public link without logging in no longer calls the visit tracker, which needs a login.
+- People a folder is shared with (without Frappe roles on File) could not rename, move, trash,
+  restore or permanently delete in it, nor upload into it: saves went through File role
+  permissions, and the quota check required team membership. Drive permissions are checked first,
+  then the change is saved; the quota check no longer needs membership.
+- Renaming, moving or permanently deleting a folder now reaches everything inside it for those
+  people too (children were looked up with the caller's role filter and came back empty).
 
 ### Compatibility
 

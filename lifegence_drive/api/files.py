@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename, send_file
 from werkzeug.wrappers import Response
 from werkzeug.wsgi import wrap_file
 
-from lifegence_drive.api.storage import storage_bar_data
+from lifegence_drive.api.storage import storage_usage
 from lifegence_drive.utils import (
     create_drive_file,
     default_team,
@@ -100,7 +100,7 @@ def upload_file(
 
     # Validate that file size is matching
     file_size = temp_path.stat().st_size
-    storage_data = storage_bar_data(team)
+    storage_data = storage_usage(team)
     if (storage_data["limit"] - storage_data["total_size"]) < file_size:
         frappe.throw("You're out of storage!", ValueError)
 
@@ -583,7 +583,7 @@ def remove_or_restore(entity_names: list[str] | str):
             flag = STATUS_TRASHED
             manager.move_to_trash(doc)
         else:
-            storage_data = storage_bar_data(doc.team)
+            storage_data = storage_usage(doc.team)
             if (storage_data["limit"] - storage_data["total_size"]) < doc.file_size:
                 frappe.throw("You're out of storage!", ValueError)
             manager.restore(doc)
@@ -601,7 +601,8 @@ def remove_or_restore(entity_names: list[str] | str):
                 folder_size + doc.file_size * (1 if flag == STATUS_ACTIVE else -1),
             )
 
-        doc.save()
+        # Drive access was checked above; File role permissions don't know about shares
+        doc.save(ignore_permissions=True)
 
     for entity in entity_names:
         depth_zero_toggle_status(frappe.get_doc("File", entity))
