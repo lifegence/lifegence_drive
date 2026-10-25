@@ -101,7 +101,13 @@ def upload_file(
     if (storage_data["limit"] - storage_data["total_size"]) < file_size:
         frappe.throw("You're out of storage!", ValueError)
 
-    mime_type = mimemapper.get_mime_type(str(temp_path), native_first=False)
+    # The temporary name goes through secure_filename, which drops non-ASCII characters
+    # (and with them the extension of names like 提案書.docx), so detect from the real name
+    mime_type = (
+        mimemapper.get_mime_type(file_name, native_first=False)
+        or mimemapper.get_mime_type(str(temp_path), native_first=False)
+        or "application/octet-stream"
+    )
     file_type = get_file_type(mime_type)
     manager = FileManager()
 
