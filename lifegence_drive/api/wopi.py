@@ -152,13 +152,16 @@ def preview_pdf(entity_name: str):
     if not user_has_permission(entity_name, "read"):
         raise frappe.PermissionError(_("You do not have permission to view this file"))
     file = frappe.get_doc("File", entity_name)
-    cache_key = f"lifegence_drive:collabora_pdf:{file.name}:{file.modified}"
+    # The language picks the fonts for CJK text (without it, kanji fall back to Chinese fonts)
+    lang = (frappe.local.lang or "en").replace("_", "-")
+    cache_key = f"lifegence_drive:collabora_pdf:{file.name}:{file.modified}:{lang}"
     pdf = frappe.cache.get_value(cache_key)
     if not pdf:
         data = FileManager().get_file(file).read()
         r = requests.post(
             f"{collabora_url()}/cool/convert-to/pdf",
             files={"data": (file.file_name, data)},
+            data={"lang": lang},
             timeout=120,
         )
         if r.status_code != 200:
