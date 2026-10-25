@@ -42,7 +42,7 @@ const warned = ref(false)
 watch(warned, async () => {
   jwt_token.value = ''
   const res = await fetch(
-    '/api/method/drive.api.files.create_auth_token?entity_name=' + props.previewEntity.name
+    '/api/method/lifegence_drive.api.files.create_auth_token?entity_name=' + props.previewEntity.name
   )
   const { message } = JSON.parse(await res.text())
   if (message) {
@@ -57,7 +57,7 @@ const error = ref(null)
 const srcUrl = computed(() =>
   encodeURIComponent(
     new URL(
-      `/api/method/drive.api.files.get_file_content?token=${jwt_token.value}&entity_name=${props.previewEntity.name}&trigger_download=1`,
+      `/api/method/lifegence_drive.api.files.get_file_content?token=${jwt_token.value}&entity_name=${props.previewEntity.name}&trigger_download=1`,
       window.location.origin
     ).href
   )

@@ -109,7 +109,7 @@ const routes = [
     component: Dummy,
     beforeEnter: async (to) => {
       const entity = createResource({
-        url: '/api/method/drive.api.files.get_entity_type',
+        url: '/api/method/lifegence_drive.api.files.get_entity_type',
         method: 'GET',
         params: {
           entity_name: to.params.entityName,

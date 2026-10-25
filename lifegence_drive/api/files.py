@@ -806,3 +806,31 @@ def get_upload_path(file_name):
     uploads_path.mkdir(exist_ok=True)
 
     return uploads_path / file_name
+
+@frappe.whitelist()
+def share(
+    entity_name: str,
+    method: str = "share",
+    user: str | None = None,
+    read: int | None = None,
+    comment: int | None = None,
+    share: int | None = None,
+    upload: int | None = None,
+    write: int | None = None,
+    team: int = 0,
+):
+    """Share or unshare a file. The share dialog calls this; File.share and
+    File.unshare check the caller's share permission."""
+    if method not in ("share", "unshare"):
+        frappe.throw("Method not allowed", frappe.PermissionError)
+    doc = frappe.get_doc("File", entity_name)
+    if method == "unshare":
+        if user == frappe.session.user and not user_has_permission(doc, "share"):
+            # People can always remove their own access
+            for perm in frappe.get_all("Drive Permission", {"entity": entity_name, "user": user}, pluck="name"):
+                frappe.delete_doc("Drive Permission", perm, ignore_permissions=True)
+            return
+        return doc.unshare(user)
+    return doc.share(
+        user=user, read=read, comment=comment, share=share, upload=upload, write=write, team=frappe.utils.cint(team)
+    )
