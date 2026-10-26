@@ -6,7 +6,7 @@ app_publisher = "Lifegence Corporation (based on Frappe Drive by Frappe Technolo
 app_description = "An easy to use, document sharing and management solution."
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
-app_email = "masakazu.nomura@lifegence.com"
+app_email = "contact@lifegence.com"
 app_license = "GNU Affero General Public License v3.0"
 
 # WOPI endpoints for Collabora Online (only active when drive_collabora_url is set)
