@@ -1,7 +1,14 @@
 <template>
   <!-- With Collabora, previews are rendered on our own servers -->
   <iframe
-    v-if="useCollabora"
+    v-if="useCollabora && isSpreadsheet(previewEntity)"
+    :src="collaboraViewerUrl(previewEntity)"
+    class="w-full h-full"
+    frameborder="0"
+    allow="clipboard-write *; fullscreen"
+  />
+  <iframe
+    v-else-if="useCollabora"
     :src="collaboraPreviewUrl(previewEntity)"
     class="w-4/5 mx-auto h-full"
     frameborder="0"
@@ -41,7 +48,12 @@
 </template>
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { canUseCollabora, collaboraPreviewUrl } from '@/resources/collabora'
+import {
+  canUseCollabora,
+  collaboraPreviewUrl,
+  collaboraViewerUrl,
+  isSpreadsheet,
+} from '@/resources/collabora'
 const props = defineProps({
   previewEntity: Object,
 })

@@ -23,3 +23,10 @@ export const openInCollabora = (entity) =>
 
 export const collaboraPreviewUrl = (entity) =>
   `/api/method/lifegence_drive.api.wopi.preview_pdf?entity_name=${encodeURIComponent(entity.name)}`
+
+// Spreadsheets preview in Collabora's read-only viewer; as PDF, wide sheets come out tiny
+const SPREADSHEETS = ['xlsx', 'xlsm', 'xls', 'ods', 'fods', 'csv']
+export const isSpreadsheet = (entity) => SPREADSHEETS.includes(extension(entity?.file_name))
+
+export const collaboraViewerUrl = (entity) =>
+  `/drive_office?file=${encodeURIComponent(entity.name)}&view=1`

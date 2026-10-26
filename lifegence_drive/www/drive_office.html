@@ -18,13 +18,13 @@
     allow="clipboard-read *; clipboard-write *; fullscreen"></iframe>
   <script>
     document.getElementById("office_form").submit();
-    // Close button in Collabora returns to Drive
-    window.addEventListener("message", function (e) {
+    // Close button in Collabora returns to Drive (not in a preview, which Drive closes itself)
+    {% if not view %}window.addEventListener("message", function (e) {
       try {
         var msg = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
         if (msg && msg.MessageId === "UI_Close") window.location.href = "{{ back_url }}";
       } catch (err) {}
-    });
+    });{% endif %}
   </script>
 </body>
 </html>

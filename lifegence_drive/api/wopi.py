@@ -36,6 +36,7 @@ from lifegence_drive.utils.files import FileManager
 
 TOKEN_TTL = 10 * 60 * 60  # seconds; Collabora refreshes the editor before it runs out
 DISCOVERY_TTL = 60 * 60
+SPREADSHEET_EXTENSIONS = {"xlsx", "xlsm", "xls", "ods", "fods", "csv"}
 
 
 def collabora_url():
@@ -63,14 +64,17 @@ def _sign(payload: bytes) -> str:
     return _b64(hmac.new(key, payload, hashlib.sha256).digest())
 
 
-def make_token(file: str, user: str, ttl: int = TOKEN_TTL) -> tuple[str, int]:
+def make_token(file: str, user: str, ttl: int = TOKEN_TTL, view_only: bool = False) -> tuple[str, int]:
     expires = int(time.time()) + ttl
-    payload = json.dumps({"f": file, "u": user, "e": expires}, separators=(",", ":")).encode()
+    data = {"f": file, "u": user, "e": expires}
+    if view_only:
+        data["v"] = 1
+    payload = json.dumps(data, separators=(",", ":")).encode()
     return f"{_b64(payload)}.{_sign(payload)}", expires
 
 
-def read_token(token: str, file: str) -> str | None:
-    """Return the token's user if the token is valid for this file, else None."""
+def token_data(token: str, file: str) -> dict | None:
+    """The token's payload if the token is valid for this file, else None."""
     try:
         body, sig = token.split(".", 1)
         payload = _unb64(body)
@@ -81,7 +85,13 @@ def read_token(token: str, file: str) -> str | None:
     data = json.loads(payload)
     if data.get("f") != file or data.get("e", 0) < time.time():
         return None
-    return data.get("u")
+    return data
+
+
+def read_token(token: str, file: str) -> str | None:
+    """Return the token's user if the token is valid for this file, else None."""
+    data = token_data(token, file)
+    return data.get("u") if data else None
 
 
 # Discovery
@@ -106,19 +116,20 @@ def extension(file_name: str) -> str:
 
 
 @frappe.whitelist()
-def get_editor(entity_name: str):
-    """Where and how the browser opens a file in Collabora."""
+def get_editor(entity_name: str, view: int = 0):
+    """Where and how the browser opens a file in Collabora. With view, read-only even for editors."""
     if not collabora_url():
         frappe.throw(_("Collabora is not configured on this site."))
     if not user_has_permission(entity_name, "read"):
         raise frappe.PermissionError("You do not have permission to view this file")
     file_name = frappe.db.get_value("File", entity_name, "file_name")
     actions = discovery().get(extension(file_name)) or {}
-    can_write = bool(user_has_permission(entity_name, "write"))
+    view = bool(frappe.utils.cint(view))
+    can_write = not view and bool(user_has_permission(entity_name, "write"))
     urlsrc = actions.get("edit" if can_write else "view") or actions.get("view")
     if not urlsrc:
         frappe.throw(_("This file type can't be opened in Collabora."))
-    token, expires = make_token(entity_name, frappe.session.user)
+    token, expires = make_token(entity_name, frappe.session.user, view_only=view)
     wopi_src = f"{wopi_base()}/wopi/files/{entity_name}"
     sep = "" if urlsrc.endswith(("?", "&")) else ("&" if "?" in urlsrc else "?")
     lang = (frappe.local.lang or "en").replace("_", "-")
@@ -155,14 +166,18 @@ def preview_pdf(entity_name: str):
     file = frappe.get_doc("File", entity_name)
     # The language picks the fonts for CJK text (without it, kanji fall back to Chinese fonts)
     lang = (frappe.local.lang or "en").replace("_", "-")
-    cache_key = f"lifegence_drive:collabora_pdf:{file.name}:{file.modified}:{lang}"
+    form = {"lang": lang}
+    if extension(file.file_name) in SPREADSHEET_EXTENSIONS:
+        # One page per sheet: print pages split wide tables and shrink them
+        form["options"] = json.dumps({"SinglePageSheets": {"type": "boolean", "value": "true"}})
+    cache_key = f"lifegence_drive:collabora_pdf:{file.name}:{file.modified}:{lang}:{'options' in form}"
     pdf = frappe.cache.get_value(cache_key)
     if not pdf:
         data = FileManager().get_file(file).read()
         r = requests.post(
             f"{collabora_url()}/cool/convert-to/pdf",
             files={"data": (file.file_name, data)},
-            data={"lang": lang},
+            data=form,
             timeout=120,
         )
         if r.status_code != 200:
@@ -191,9 +206,9 @@ def _iso(dt) -> str:
     return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
-def check_file_info(file):
+def check_file_info(file, view_only=False):
     user = frappe.session.user
-    can_write = bool(user_has_permission(file, "write"))
+    can_write = not view_only and bool(user_has_permission(file, "write"))
     if can_write:
         # Collabora calls this for each person who joins, so co-editors are all recorded
         versions.note_editor(file, user)
@@ -220,8 +235,8 @@ def get_file(file):
     return Response(buf.read(), mimetype="application/octet-stream")
 
 
-def put_file(file, request):
-    if not user_has_permission(file, "write"):
+def put_file(file, request, view_only=False):
+    if view_only or not user_has_permission(file, "write"):
         return Response(status=401)
     # Collabora sends the modified time it last saw; refuse to overwrite a newer file
     seen = request.headers.get("X-COOL-WOPI-Timestamp")
@@ -291,7 +306,8 @@ class WOPIPage:
         if len(parts) not in (3, 4) or (len(parts) == 4 and parts[3] != "contents"):
             return Response(status=404)
         name = parts[2]
-        user = read_token(request.args.get("access_token", ""), name)
+        token = token_data(request.args.get("access_token", ""), name) or {}
+        user, view_only = token.get("u"), bool(token.get("v"))
         if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
             return Response(status=401)
         # As above: a signed, unexpired token for this file names the user
@@ -308,9 +324,9 @@ class WOPIPage:
         if not user_has_permission(doc, "read"):
             return Response(status=401)
         if len(parts) == 3:
-            return check_file_info(doc) if request.method == "GET" else Response(status=501)
+            return check_file_info(doc, view_only) if request.method == "GET" else Response(status=501)
         if request.method == "GET":
             return get_file(doc)
         if request.method == "POST" and request.headers.get("X-WOPI-Override") == "PUT":
-            return put_file(doc, request)
+            return put_file(doc, request, view_only)
         return Response(status=501)
