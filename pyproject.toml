@@ -1,7 +1,7 @@
 [project]
 name = "lifegence_drive"
 authors = [
-    { name = "Lifegence Corporation", email = "masakazu.nomura@lifegence.com" },
+    { name = "Lifegence Corporation", email = "contact@lifegence.com" },
     { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io" },
 ]
 description = "An easy to use, document sharing and management solution."
