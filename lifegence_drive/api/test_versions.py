@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Lifegence Corporation and Contributors
 # See license.txt
 
+import json
 from datetime import timedelta
 from io import BytesIO
 from types import SimpleNamespace
@@ -88,6 +89,15 @@ class TestVersions(IntegrationTestCase):
         with self.at(minutes):
             res = wopi.put_file(frappe.get_doc("File", self.file), SimpleNamespace(headers={}, get_data=lambda: data))
         self.assertEqual(res.status_code, 200, res.get_data())
+
+    def test_preview_is_read_only_for_editors(self):
+        frappe.set_user(EDITOR)
+        doc = frappe.get_doc("File", self.file)
+        info = json.loads(wopi.check_file_info(doc, view_only=True).get_data())
+        self.assertFalse(info["UserCanWrite"])
+        res = wopi.put_file(doc, SimpleNamespace(headers={}, get_data=lambda: b"v1"), view_only=True)
+        self.assertEqual(res.status_code, 401)
+        self.assertTrue(json.loads(wopi.check_file_info(doc).get_data())["UserCanWrite"])
 
     def test_first_save_keeps_the_uploaded_content(self):
         self.join(OWNER, 0)

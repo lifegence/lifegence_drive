@@ -16,7 +16,8 @@ def get_context(context):
     file = frappe.form_dict.get("file")
     if not file:
         raise frappe.PageDoesNotExistError
-    context.editor = get_editor(file)
+    context.view = frappe.utils.cint(frappe.form_dict.get("view"))
+    context.editor = get_editor(file, view=context.view)
     context.back_url = "/drive/"
     context.no_header = True
     context.no_breadcrumbs = True

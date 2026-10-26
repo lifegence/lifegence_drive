@@ -28,6 +28,13 @@ class TestWopiToken(IntegrationTestCase):
         token, _ = wopi.make_token("file-1", "a@example.com", ttl=-1)
         self.assertIsNone(wopi.read_token(token, "file-1"))
 
+    def test_view_only_token(self):
+        token, _ = wopi.make_token("file-1", "a@example.com", view_only=True)
+        self.assertEqual(wopi.read_token(token, "file-1"), "a@example.com")
+        self.assertEqual(wopi.token_data(token, "file-1").get("v"), 1)
+        plain, _ = wopi.make_token("file-1", "a@example.com")
+        self.assertNotIn("v", wopi.token_data(plain, "file-1"))
+
     def test_tampered_token_is_refused(self):
         token, _ = wopi.make_token("file-1", "a@example.com")
         other, _ = wopi.make_token("file-1", "admin@example.com")
