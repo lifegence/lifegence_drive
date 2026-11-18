@@ -52,7 +52,7 @@
     v-else-if="dialog === 'tg'"
     v-model="dialog"
     :entities="entities"
-    @success="listResource?.setData?.(listResource.data)"
+    @success="onTagsChanged"
   />
 
   <!-- Confirmation dialogs -->
@@ -81,6 +81,8 @@ import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useTimeAgo } from '@vueuse/core'
 import { openEntity } from '@/utils/files'
+import { mutate, getTagged } from '@/resources/files'
+import { useRoute } from 'vue-router'
 
 import emitter from '@/emitter'
 
@@ -118,6 +120,18 @@ watch(dialog, (val) => {
 })
 
 const resetDialog = () => (dialog.value = '')
+
+const route = useRoute()
+function onTagsChanged(entities) {
+  // Same rows can sit in Recents, Favourites, etc.; keep their chips in step
+  mutate(
+    entities.map(({ name, tags }) => ({ name, tags })),
+    (el, { tags }) => (el.tags = tags)
+  )
+  listResource.value?.setData?.(listResource.value.data)
+  // Membership and counts in the Tags view depend on the tags just changed
+  if (route.name === 'Tags') getTagged.fetch(getTagged.params)
+}
 
 emitter.on('share', () => (dialog.value = 's'))
 emitter.on('newFolder', () => (dialog.value = 'f'))

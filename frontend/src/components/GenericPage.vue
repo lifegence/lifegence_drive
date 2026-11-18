@@ -355,6 +355,7 @@ const actionItems = computed(() => {
         action: () => (dialog.value = 'tg'),
         isEnabled: (e) => isManaged(e) && e.write,
         multi: true,
+        important: true,
       },
       {
         label: __('Favourite'),

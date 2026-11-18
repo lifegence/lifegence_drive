@@ -108,3 +108,24 @@ class TestTags(IntegrationTestCase):
         add_tag([self.a.name, c.name], self.label)
         names = {f["name"] for f in tagged(tag=self.label)}
         self.assertEqual(names, {self.a.name, c.name})
+
+    def test_counts_match_what_opening_the_tag_lists(self):
+        self.team.append("users", {"user": VIEWER})
+        self.team.save(ignore_permissions=True)
+        add_tag([self.a.name, self.b.name], self.label)
+        for user in (OWNER, VIEWER, OUTSIDER):
+            frappe.set_user(user)
+            counts = {t["tag"]: t["count"] for t in get_tags(self.team.name)}
+            listed = tagged(self.team.name, tag=self.label)
+            self.assertEqual(counts.get(self.label, 0), len(listed), user)
+
+    def test_tag_search_treats_wildcards_literally(self):
+        add_tag(self.a.name, f"{self.label}_x")
+        add_tag(self.b.name, f"{self.label}yx")
+        found = [t["tag"] for t in get_tags(self.team.name, txt=f"{self.label}_")]
+        self.assertEqual(found, [f"{self.label}_x"])
+
+    def test_removing_a_missing_tag_leaves_the_file_alone(self):
+        add_tag(self.a.name, self.label)
+        self.assertEqual(remove_tag(self.a.name, "not-there"), {self.a.name: [self.label]})
+        self.assertEqual(self.links(self.a.name), [self.label])

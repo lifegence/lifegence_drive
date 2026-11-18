@@ -129,7 +129,7 @@ export const getShared = createResource({
 export const getTagged = createResource({
   ...COMMON_OPTIONS,
   url: 'lifegence_drive.api.list.tagged',
-  cache: 'tagged-folder-contents',
+  // No cache: one key would show the previous tag's files under the next tag
   makeParams: (params) => params,
 })
 
@@ -152,9 +152,10 @@ export const LISTS = [
   getTagged,
 ]
 export const mutate = (entities, func) => {
-  LISTS.forEach((l) =>
+  LISTS.forEach((l) => {
+    // setData runs the list transform, which fails on lists that were never loaded
+    if (!l.data) return
     l.setData((d) => {
-      if (!d) return
       entities.forEach(({ name, ...params }) => {
         let el = d.find((k) => k.name === name)
         if (el) {
@@ -163,7 +164,7 @@ export const mutate = (entities, func) => {
       })
       return d
     })
-  )
+  })
 }
 
 export const updateMoved = (team, new_parent, special) => {

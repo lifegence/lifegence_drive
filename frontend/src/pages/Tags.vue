@@ -31,11 +31,18 @@ const store = useStore()
 
 watch(
   () => props.tag,
-  (tag) => {
-    // GenericPage refetches when the resource params change through its own watcher;
-    // set the tag first so that fetch already carries it.
-    getTagged.params = { ...getTagged.params, tag: tag || '' }
-    if (getTagged.fetched) getTagged.fetch(getTagged.params)
+  (tag, previous) => {
+    const params = { ...getTagged.params, tag: tag || '' }
+    if (previous === undefined) {
+      // First run: GenericPage fetches on mount with these params, so don't fetch twice.
+      // Drop rows left from an earlier visit (possibly another tag) before they render.
+      getTagged.reset()
+      getTagged.params = params
+    } else {
+      // Moving between tags reuses this component, so GenericPage won't refetch
+      getTagged.setData(null)
+      getTagged.fetch(params)
+    }
     store.commit(
       'setBreadcrumbs',
       [
