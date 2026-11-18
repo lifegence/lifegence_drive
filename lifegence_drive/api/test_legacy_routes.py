@@ -16,7 +16,9 @@ from lifegence_drive.utils.files import storage_key
 
 API = Path(__file__).parent
 # Modules added in Lifegence Drive: nothing ever called them under drive.api.*
-NEW_MODULES = {"versions", "wopi"}
+NEW_MODULES = {"tags", "versions", "wopi"}
+# Functions added to existing modules in Lifegence Drive
+NEW_FUNCTIONS = {"list.tagged"}
 
 
 def whitelisted_functions():
@@ -32,7 +34,7 @@ def whitelisted_functions():
 
 class TestLegacyRoutes(IntegrationTestCase):
     def test_every_whitelisted_function_has_a_legacy_route(self):
-        missing = sorted(set(whitelisted_functions()) - set(LEGACY_METHODS))
+        missing = sorted(set(whitelisted_functions()) - set(LEGACY_METHODS) - NEW_FUNCTIONS)
         self.assertEqual(missing, [], "add these to legacy_routes.py")
 
     def test_old_paths_resolve_to_new_functions(self):

@@ -51,7 +51,7 @@ import {
   Tooltip,
 } from 'frappe-ui'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, h, ref, watch, useTemplateRef } from 'vue'
 import ContextMenu from '@/components/ContextMenu.vue'
 import CustomListRow from './CustomListRow.vue'
@@ -70,6 +70,7 @@ import LucideGlobe2 from '~icons/lucide/globe-2'
 
 const store = useStore()
 const route = useRoute()
+const router = useRouter()
 const props = defineProps({
   folderContents: Object,
   actionItems: Array,
@@ -95,6 +96,54 @@ const formattedRows = computed(() => {
     .filter((g) => g.rows.length)
 })
 
+const shareIcon = (row) => {
+  if (row.share_count === props.rootEntity?.share_count) return
+  if (row.share_count === -2) {
+    return h(Tooltip, { text: __('Public') }, {
+      default: () => h(LucideGlobe2, { class: 'size-4' })
+    })
+  } else if (row.share_count === -1) {
+    return h(Tooltip, { text: __('Organization') }, {
+      default: () => h(LucideBuilding2, { class: 'size-4' })
+    })
+  } else if (row.share_count > 0) {
+    return h(Tooltip, { text: __('Shared with {0} users').format(row.share_count) }, {
+      default: () => h(LucideUsers, { class: 'size-4' })
+    })
+  }
+}
+
+const MAX_TAG_CHIPS = 3
+const chipClass =
+  'rounded bg-surface-gray-2 px-1.5 py-px text-xs text-ink-gray-7 whitespace-nowrap max-w-32 truncate'
+const tagChips = (row) => {
+  const tags = row.tags || []
+  if (!tags.length) return []
+  const chips = tags.slice(0, MAX_TAG_CHIPS).map((tag) =>
+    h(
+      'button',
+      {
+        class: chipClass + ' hover:bg-surface-gray-3',
+        title: tag,
+        onClick: (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          router.push({ name: 'Tags', params: { tag } })
+        },
+      },
+      tag
+    )
+  )
+  if (tags.length > MAX_TAG_CHIPS) {
+    chips.push(
+      h(Tooltip, { text: tags.slice(MAX_TAG_CHIPS).join(', ') }, {
+        default: () => h('span', { class: chipClass }, '+' + (tags.length - MAX_TAG_CHIPS)),
+      })
+    )
+  }
+  return chips
+}
+
 const selectedColumns = [
   {
     label: __('Name'),
@@ -116,20 +165,8 @@ const selectedColumns = [
       return getThumbnailUrl(row)
     },
     suffix: ({ row }) => {
-      if (row.share_count === props.rootEntity?.share_count) return
-      if (row.share_count === -2) {
-        return h(Tooltip, { text: __('Public') }, {
-          default: () => h(LucideGlobe2, { class: 'size-4' })
-        })
-      } else if (row.share_count === -1) {
-        return h(Tooltip, { text: __('Organization') }, {
-          default: () => h(LucideBuilding2, { class: 'size-4' })
-        })
-      } else if (row.share_count > 0) {
-        return h(Tooltip, { text: __('Shared with {0} users', [row.share_count]) }, {
-          default: () => h(LucideUsers, { class: 'size-4' })
-        })
-      }
+      const parts = [shareIcon(row), ...tagChips(row)].filter(Boolean)
+      if (parts.length) return h('div', { class: 'flex items-center gap-1 shrink-0' }, parts)
     },
   },
   {

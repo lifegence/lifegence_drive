@@ -126,6 +126,13 @@ export const getShared = createResource({
   },
 })
 
+export const getTagged = createResource({
+  ...COMMON_OPTIONS,
+  url: 'lifegence_drive.api.list.tagged',
+  cache: 'tagged-folder-contents',
+  makeParams: (params) => params,
+})
+
 export const getTrash = createResource({
   ...COMMON_OPTIONS,
   url: 'lifegence_drive.api.list.trash',
@@ -142,6 +149,7 @@ export const LISTS = [
   getRecents,
   getShared,
   getFavourites,
+  getTagged,
 ]
 export const mutate = (entities, func) => {
   LISTS.forEach((l) =>

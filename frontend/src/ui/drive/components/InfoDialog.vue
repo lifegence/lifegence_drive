@@ -32,6 +32,29 @@
           <span class="inline-block w-24 text-ink-gray-5">{{ __('Added') }}:</span>
           <span class="col-span-1">{{ formatDate(entity.creation) }}</span>
         </li>
+        <li class="flex items-start">
+          <span class="inline-block w-24 shrink-0 text-ink-gray-5">{{ __('Tags') }}:</span>
+          <span class="flex flex-wrap items-center gap-1.5">
+            <a
+              v-for="tag in entityTags.data || []"
+              :key="tag"
+              class="rounded bg-surface-gray-2 px-1.5 py-px text-xs text-ink-gray-7 hover:bg-surface-gray-3 cursor-pointer"
+              @click="openTag(tag)"
+            >
+              {{ tag }}
+            </a>
+            <span v-if="entityTags.data && !entityTags.data.length">-</span>
+            <Button
+              v-if="entity.write"
+              variant="subtle"
+              size="sm"
+              class="scale-[90%]"
+              @click="bus.emit('tags')"
+            >
+              {{ __('Edit') }}
+            </Button>
+          </span>
+        </li>
       </ul>
 
       <ul v-if="editor?.storage?.characterCount" class="space-y-3 text-sm mb-4 text-ink-gray-8">
@@ -130,6 +153,7 @@ import {
 } from 'frappe-ui'
 import { ref, inject } from 'vue'
 import { onKeyDown } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 import { formatDate } from '../js/utils'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
@@ -166,6 +190,19 @@ const getGeneralAccess = createResource({
   },
 })
 getGeneralAccess.fetch({ user: 'Guest' })
+
+// Fetched rather than read from the row so it is right from the file page too
+const entityTags = createResource({
+  url: 'lifegence_drive.api.tags.get_entity_tags',
+  params: { entity_name: props.entity.name },
+  auto: true,
+})
+const router = useRouter()
+const bus = inject('emitter')
+const openTag = (tag) => {
+  dialogType.value = ''
+  router.push({ name: 'Tags', params: { tag } })
+}
 
 const userAccess = createResource({
   url: 'lifegence_drive.api.permissions.get_shared_with_list',

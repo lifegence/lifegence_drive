@@ -48,6 +48,12 @@
     v-model="dialog"
     :entity="entities[0]"
   />
+  <TagDialog
+    v-else-if="dialog === 'tg'"
+    v-model="dialog"
+    :entities="entities"
+    @success="listResource?.setData?.(listResource.data)"
+  />
 
   <!-- Confirmation dialogs -->
   <ConfirmDialog
@@ -80,7 +86,13 @@ import emitter from '@/emitter'
 
 import NewFolderDialog from '@/components/NewFolderDialog.vue'
 import NewLinkDialog from '@/components/NewLinkDialog.vue'
-import { ShareDialog, MoveDialog, RenameDialog, InfoDialog } from '@/ui/drive'
+import {
+  ShareDialog,
+  MoveDialog,
+  RenameDialog,
+  InfoDialog,
+  TagDialog,
+} from '@/ui/drive'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const props = defineProps({
@@ -112,6 +124,7 @@ emitter.on('newFolder', () => (dialog.value = 'f'))
 emitter.on('rename', () => (dialog.value = 'rn'))
 emitter.on('remove', () => (dialog.value = 'remove'))
 emitter.on('move', () => (dialog.value = 'm'))
+emitter.on('tags', () => (dialog.value = 'tg'))
 emitter.on('newLink', () => (dialog.value = 'l'))
 
 function addToList(data, file_type) {
