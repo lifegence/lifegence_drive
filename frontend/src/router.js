@@ -74,6 +74,13 @@ const routes = [
     beforeEnter: [setRootBreadCrumb],
   },
   {
+    path: '/tags/:tag?',
+    name: 'Tags',
+    props: true,
+    component: () => import('@/pages/Tags.vue'),
+    beforeEnter: [setRootBreadCrumb],
+  },
+  {
     path: '/shared',
     name: 'Shared',
     component: () => import('@/pages/Shared.vue'),

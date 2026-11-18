@@ -72,6 +72,7 @@ import LucideSquarePen from '~icons/lucide/square-pen'
 import LucideCornerLeftUp from '~icons/lucide/corner-left-up'
 import LucideMonitorCog from '~icons/lucide/monitor-cog'
 import LucideStar from '~icons/lucide/star'
+import LucideTag from '~icons/lucide/tag'
 import LucideTrash from '~icons/lucide/trash'
 
 const props = defineProps({
@@ -89,7 +90,7 @@ const dialog = ref('')
 provide('dialog', dialog)
 
 const team = ref(
-  ['Recents', 'Favourites', 'Trash'].includes(route.name)
+  ['Recents', 'Favourites', 'Trash', 'Tags'].includes(route.name)
     ? 'all'
     : route.params.team
 )
@@ -344,6 +345,14 @@ const actionItems = computed(() => {
         label: __('Move'),
         icon: LucideArrowLeftRight,
         action: () => (dialog.value = 'm'),
+        isEnabled: (e) => isManaged(e) && e.write,
+        multi: true,
+        important: true,
+      },
+      {
+        label: __('Tags'),
+        icon: LucideTag,
+        action: () => (dialog.value = 'tg'),
         isEnabled: (e) => isManaged(e) && e.write,
         multi: true,
         important: true,

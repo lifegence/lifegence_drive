@@ -21,6 +21,7 @@ from lifegence_drive.utils import (
 )
 from lifegence_drive.utils.api import get_default_access
 from .permissions import get_user_access, user_has_permission, get_teams
+from .tags import get_tags, normalize_tag, parse_tags
 
 DriveUser = frappe.qb.DocType("User")
 UserGroupMember = frappe.qb.DocType("User Group Member")
@@ -294,6 +295,59 @@ def recents(
 
 
 @frappe.whitelist()
+def tagged(
+    team: str | None = None,
+    tag: str | None = None,
+    order_by: str = "modified",
+    ascending: bool = True,
+    file_kinds: list[str] | str = [],
+    search: str = None,
+):
+    """
+    Without `tag`: one virtual folder per tag used in the user's teams.
+    With `tag`: active team files carrying that tag that the user can read.
+    `team` narrows to one team; empty or "all" spans every team the user is in.
+    """
+    if not tag:
+        return [
+            {
+                "name": "tag:" + t["tag"],
+                "file_name": t["tag"],
+                "tag": t["tag"],
+                "is_folder": 1,
+                "file_type": "Folder",
+                "child_count": t["count"],
+                "kind": KIND_VIRTUAL,
+            }
+            for t in get_tags(team)
+        ]
+
+    tag = normalize_tag(tag)
+    TagLink = frappe.qb.DocType("Tag Link")
+    teams = get_teams()
+    if team and team != "all":
+        teams = [t for t in teams if t == team]
+    tagged_names = (
+        frappe.qb.from_(TagLink)
+        .where((TagLink.document_type == "File") & (TagLink.tag == tag))
+        .select(TagLink.document_name)
+    )
+    query = (
+        _get_basic_query(search)
+        .where(DriveFile.team.isin(teams or [""]))
+        .where(DriveFile.name.isin(tagged_names))
+    )
+    res = get_query_data(
+        query,
+        file_kinds=file_kinds,
+        order_by=order_by,
+        ascending=ascending,
+    )
+    # Team membership alone doesn't grant access to every file; drop what the user can't read.
+    return [r for r in res if r.get("read")]
+
+
+@frappe.whitelist()
 @default_team
 def trash(
     team: str,
@@ -387,7 +441,7 @@ def get_query_data(
             .orderby(DriveFile[order_by], order=Order.asc if ascending else Order.desc)
         )
 
-    query = query.select(Recents.last_interaction.as_("accessed"))
+    query = query.select(Recents.last_interaction.as_("accessed"), DriveFile._user_tags)
 
     # Apply file kind filter
     query = _apply_file_kinds_filter(query, file_kinds)
@@ -433,6 +487,7 @@ def get_query_data(
         if is_site_file(r):
             r["file_type"] = map_ff_to_drive_type(r)
         r["kind"] = entity_kind(r)
+        r["tags"] = parse_tags(r.pop("_user_tags", None))
         hide_storage_key(r)
         r |= get_user_access(name)
 

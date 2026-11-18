@@ -90,6 +90,9 @@ export function isVirtual(entity) {
 export const openEntity = (entity, new_tab = false) => {
   // Virtual grouping node: navigate into its attachments bucket. A node with an
   // attached_to_name drills into a single document; otherwise into a doctype.
+  if (isVirtual(entity) && entity.tag) {
+    return router.push({ name: 'Tags', params: { tag: entity.tag } })
+  }
   if (isVirtual(entity)) {
     return router.push({
       name: 'Attachments',

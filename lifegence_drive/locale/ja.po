@@ -1224,3 +1224,48 @@ msgstr "このファイルを編集中の人がいます。編集が終わって
 
 msgid "Only people who can edit this file can see its versions."
 msgstr "版を見られるのは、このファイルを編集できる人だけです。"
+
+msgid "Tags ({0} items)"
+msgstr "タグ（{0} 件）"
+
+msgid "Tags you add or remove here apply to every selected item."
+msgstr "ここで追加・削除したタグは、選択したすべての項目に反映されます。"
+
+msgid "Remove tag {0}"
+msgstr "タグ「{0}」を外す"
+
+msgid "No tags yet"
+msgstr "タグはまだありません"
+
+msgid "Add a tag"
+msgstr "タグを追加"
+
+msgid "Nothing tagged {0}"
+msgstr "「{0}」のタグが付いたファイルはありません"
+
+msgid "Files you can open that carry this tag appear here."
+msgstr "このタグが付いた、開く権限のあるファイルがここに表示されます。"
+
+msgid "Right-click a file and choose Tags to add one."
+msgstr "ファイルを右クリックして「タグ」から追加できます。"
+
+msgid "Could not add the tag."
+msgstr "タグを追加できませんでした。"
+
+msgid "Could not remove the tag."
+msgstr "タグを外せませんでした。"
+
+msgid "Tags cannot contain commas"
+msgstr "タグにカンマは使えません"
+
+msgid "Tag cannot be empty"
+msgstr "タグを入力してください"
+
+msgid "Tags can be at most {0} characters"
+msgstr "タグは {0} 文字以内で入力してください"
+
+msgid "You don't have access to this file."
+msgstr "このファイルへのアクセス権がありません。"
+
+msgid "Shared with {0} users"
+msgstr "{0} 人と共有"

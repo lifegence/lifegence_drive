@@ -62,6 +62,7 @@ import LucideFiles from '~icons/lucide/files'
 import LucideTrash from '~icons/lucide/trash'
 import LucideHome from '~icons/lucide/home'
 import LucideStar from '~icons/lucide/star'
+import LucideTag from '~icons/lucide/tag'
 import LucidePaperclip from '~icons/lucide/paperclip'
 import LucideInbox from '~icons/lucide/inbox'
 import LucideSearch from '~icons/lucide/search'
@@ -290,6 +291,12 @@ const sidebarItems = computed(() => {
           icon: LucideStar,
           isActive: first.name == 'Favourites',
           accessKey: 'f',
+        },
+        {
+          label: 'Tags',
+          to: `/tags`,
+          icon: LucideTag,
+          isActive: first.name == 'Tags',
         },
         {
           label: 'Documents',

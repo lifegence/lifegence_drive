@@ -58,6 +58,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends mariadb-client
+          # Newer mariadb clients require TLS by default; the mariadb:10.6 service has none
+          printf '[client]\nskip-ssl\n' > ~/.my.cnf
 
       - name: Set up bench
         run: |

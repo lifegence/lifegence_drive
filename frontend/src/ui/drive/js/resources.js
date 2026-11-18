@@ -60,3 +60,26 @@ export const rename = createResource({
     toast.error(error)
   },
 })
+
+// Tags
+export const allTags = createResource({
+  url: 'lifegence_drive.api.tags.get_tags',
+  method: 'GET',
+  cache: 'drive-tags',
+})
+
+export const addTag = createResource({
+  url: 'lifegence_drive.api.tags.add_tag',
+  method: 'POST',
+  onError(error) {
+    toast.error(error.messages?.[0] || __('Could not add the tag.'))
+  },
+})
+
+export const removeTag = createResource({
+  url: 'lifegence_drive.api.tags.remove_tag',
+  method: 'POST',
+  onError(error) {
+    toast.error(error.messages?.[0] || __('Could not remove the tag.'))
+  },
+})
