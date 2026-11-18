@@ -17,9 +17,6 @@ from .permissions import get_teams, get_user_access, user_has_permission
 
 MAX_TAG_LENGTH = 140
 
-DriveFile = frappe.qb.DocType("File")
-TagLink = frappe.qb.DocType("Tag Link")
-
 
 def normalize_tag(tag: str) -> str:
     """Trim, collapse whitespace and reject values that can't be stored as a tag."""
@@ -146,6 +143,8 @@ def get_tags(team: str | None = None, txt: str | None = None) -> list[dict]:
     if not teams:
         return []
 
+    DriveFile = frappe.qb.DocType("File")
+    TagLink = frappe.qb.DocType("Tag Link")
     query = (
         frappe.qb.from_(TagLink)
         .join(DriveFile)

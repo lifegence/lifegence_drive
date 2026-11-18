@@ -31,7 +31,6 @@ Team = frappe.qb.DocType("Drive Team")
 TeamMember = frappe.qb.DocType("Drive Team Member")
 DriveFavourite = frappe.qb.DocType("Drive Favourite")
 Recents = frappe.qb.DocType("Drive Entity Log")
-TagLink = frappe.qb.DocType("Tag Link")
 
 Binary = CustomFunction("BINARY", ["expression"])
 
@@ -324,6 +323,7 @@ def tagged(
         ]
 
     tag = normalize_tag(tag)
+    TagLink = frappe.qb.DocType("Tag Link")
     teams = get_teams()
     if team and team != "all":
         teams = [t for t in teams if t == team]
