@@ -13,8 +13,6 @@ reads anything. Access is Drive's own: `user_has_permission` decides, so the ass
 exactly the files the user could open in Drive and nothing else.
 """
 
-from __future__ import annotations
-
 import frappe
 
 from lifegence_drive.ai import extract
