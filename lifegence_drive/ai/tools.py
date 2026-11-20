@@ -9,13 +9,15 @@ The agent wraps each dict in its own ToolSpec. The same entitlement, policy, aud
 approval checks then run as for its built-in tools.
 
 A body takes `guard` first, bound to its tool name by the agent, and calls it before it
-reads anything. Access is Drive's own: `user_has_permission` decides, so the assistant reads
+reads anything. Access is Drive's own: `user_has_permission` decides (not `frappe.has_permission`, which
+checks roles first), so the assistant reads
 exactly the files the user could open in Drive and nothing else.
 """
 
 import frappe
 
 from lifegence_drive.ai import extract
+from lifegence_drive.api.permissions import user_has_permission
 
 DEFAULT_MAX_CHARS = 20000
 MAX_CHARS_LIMIT = 50000
@@ -111,7 +113,9 @@ def _resolve(file: str):
             limit=20,
         )
     readable = [frappe.get_doc("File", n) for n in names]
-    readable = [d for d in readable if frappe.has_permission("File", "read", doc=d)]
+    # Drive's own check, as WOPI and the Drive API use it. frappe.has_permission looks at roles
+    # first, so an outside collaborator with no role would be refused a file shared with them.
+    readable = [d for d in readable if user_has_permission(d, "read")]
     if not readable:
         # Same answer whether it does not exist or is not shared with the user.
         return {"error": f"No file named {key!r} that you can open was found in Drive."}
