@@ -225,5 +225,24 @@ class TestPdfAndText(unittest.TestCase):
             extract.extract_text(package({"word/document.xml": bomb}), "bomb.docx")
 
 
+class TestToolsModuleImports(unittest.TestCase):
+    def test_no_site_bound_import_at_module_level(self):
+        # ai_agent_app imports the provider before a site is bound (in a worker). A module-level
+        # import of lifegence_drive.api.* or utils.files would fail there and drop the tool.
+        import ast
+        import pathlib
+
+        src = pathlib.Path(extract.__file__).with_name("tools.py").read_text()
+        top = [
+            n
+            for n in ast.parse(src).body
+            if isinstance(n, (ast.Import, ast.ImportFrom))
+        ]
+        modules = [
+            n.module if isinstance(n, ast.ImportFrom) else n.names[0].name for n in top
+        ]
+        self.assertEqual(sorted(modules), ["frappe", "lifegence_drive.ai"])
+
+
 if __name__ == "__main__":
     unittest.main()

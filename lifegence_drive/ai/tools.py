@@ -17,7 +17,10 @@ exactly the files the user could open in Drive and nothing else.
 import frappe
 
 from lifegence_drive.ai import extract
-from lifegence_drive.api.permissions import user_has_permission
+
+# Import nothing site-bound at module level: ai_agent_app reads the providers when its tools
+# module is imported, which a worker does before any site is bound (lifegence_drive.api.permissions
+# builds frappe.qb objects at import time). Imports that need a site go inside the functions.
 
 DEFAULT_MAX_CHARS = 20000
 MAX_CHARS_LIMIT = 50000
@@ -123,6 +126,8 @@ def _resolve(file: str):
     readable = [frappe.get_doc("File", n) for n in names]
     # Drive's own check, as WOPI and the Drive API use it. frappe.has_permission looks at roles
     # first, so an outside collaborator with no role would be refused a file shared with them.
+    from lifegence_drive.api.permissions import user_has_permission
+
     readable = [d for d in readable if user_has_permission(d, "read")]
     if not readable:
         # Same answer whether it does not exist or is not shared with the user.
