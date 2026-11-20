@@ -114,6 +114,11 @@ has_permission = {
 }
 
 after_upload_file = "lifegence_drive.overrides.file.after_upload_file"
+
+# Tools for the AI agent (ai_agent_app). Each provider returns dicts in ai_agent_app's ToolSpec
+# fields; the agent applies its own policy, audit, caps and approval to them. Ignored when
+# ai_agent_app is not installed or does not read this hook yet.
+ai_agent_tools = ["lifegence_drive.ai.tools.get_tools"]
 # write_file = 'lifegence_drive.overrides.file.write_file'
 # DocType Class
 # ---------------
