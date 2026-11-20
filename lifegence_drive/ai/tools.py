@@ -33,14 +33,18 @@ def get_tools() -> list[dict]:
             "risk": "read",
             "permission": "read",
             "prompt_rule": (
-                "When the user asks about what a file stored in Drive says (Word .docx, Excel .xlsx, "
-                'PowerPoint .pptx, PDF or a text file) → call tool "read_drive_file" with the file\'s '
-                "name (the File record name) or its exact file name; find the file first with "
-                'search_frappe_docs on DocType "File" only if you do not know it. Answer from the '
-                "returned text. If the result has truncated true, call it again with start=next_start "
-                "only when the rest is needed for the answer. If the result is an error saying the "
-                "format cannot be read, tell the user that and stop; do not search other DocTypes for "
-                "the same content."
+                "You CAN read the contents of files stored in Drive (Word .docx, Excel .xlsx, PowerPoint "
+                '.pptx, PDF, text) with tool "read_drive_file". Whenever a request depends on what such '
+                "a file says (to answer, summarise, compare, or to create or update records from it), "
+                'call "read_drive_file" with the File record name (e.g. "099fcdc072", also the last part '
+                "of a /drive/f/... link) or the exact file name, then work from the returned text. Never "
+                "tell the user you cannot read a Word, Excel, PowerPoint or PDF file, and never ask them "
+                'to paste its contents, before you have called "read_drive_file" for it; this holds even '
+                "if earlier answers in this conversation said otherwise. Use search_frappe_docs on "
+                'DocType "File" only to find the file when you do not know its name. If the result has '
+                "truncated true, call again with start=next_start only when the rest is needed. If the "
+                "result is an error saying the format cannot be read, tell the user that and stop; do "
+                "not search other DocTypes for the same content."
             ),
             "change_fields_arg": None,
             "body": read_drive_file,
@@ -54,7 +58,8 @@ def read_drive_file(
     """Text of one Drive file the user can read, in pages of up to `max_chars` characters.
 
     Args:
-        file: the File record name, or the exact file name (e.g. "20261130_Script.docx")
+        file: the File record name (e.g. "099fcdc072"), a Drive link to the file, or its exact
+            file name (e.g. "20261130_Script.docx")
         start: character offset to read from (use next_start from the previous result)
         max_chars: characters to return, up to 50000
     """
@@ -99,6 +104,9 @@ def read_drive_file(
 def _resolve(file: str):
     """The File the caller may read, or a dict answer for the model (not found / which one?)."""
     key = (file or "").strip()
+    if "/" in key:
+        # A Drive link (https://.../drive/f/099fcdc072?...) or a path: the record name is the last part
+        key = key.split("?", 1)[0].split("#", 1)[0].rstrip("/").rsplit("/", 1)[-1]
     if not key:
         return {"error": "Give the file's name or its exact file name."}
     names = []

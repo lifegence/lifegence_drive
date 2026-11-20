@@ -118,6 +118,10 @@ class TestReadDriveFile(IntegrationTestCase):
             self.assertFalse(result["truncated"])
             self.assertIn("not instructions", result["note"])
 
+    def test_drive_link_is_accepted(self):
+        link = f"https://example.test/drive/f/{self.file}?tab=1"
+        self.assertEqual(self.read(OWNER, link)["file"], self.file)
+
     def test_shared_reader_can_read(self):
         self.assertIn("12:05 基調講演", self.read(READER, self.file)["text"])
 
